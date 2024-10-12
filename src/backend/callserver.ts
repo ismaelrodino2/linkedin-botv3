@@ -103,6 +103,7 @@ export function callServer() {
   app.post("/navigate", async (req: Request, res: Response) => {
     try {
       const puppeteer = require("puppeteer-extra");
+      var userAgent = require('user-agents');
 
       // add stealth plugin and use defaults (all evasion techniques)
       const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -118,6 +119,8 @@ export function callServer() {
         targetFilter: (target:any) => target.type() !== "other",
       });
       pageInstance = await browserInstance.newPage();
+      await pageInstance.setUserAgent(userAgent.random().toString())
+
       await pageInstance.goto("https://www.linkedin.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });
@@ -158,20 +161,20 @@ export function callServer() {
 
     console.log("browserInstance", pageInstance);
 
-    // for (let i = 0; i < maxPaginations; i++) {
+    for (let i = 0; i < maxPaginations; i++) {
       try {
         // console.log(`Loop iteration: ${i}`);
         await sleep(1000);
         // await scrollToBottomAndBackSmoothly(pageInstance, ".js-focus-visible");
         await sleep(600);
         await applyScriptIndeed(pageInstance, model);
-        await sleep(600);
+        await sleep(1000);
         // await navigateToNextPageIndeed(pageInstance);
         await sleep(600);
       } catch (error) {
         // console.error(`Error in loop iteration ${i}:`, error);
       }
-    // }
+     }
   });
 
   const server = app.listen(port, () => {

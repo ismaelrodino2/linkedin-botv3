@@ -30,7 +30,7 @@ interface Params {
 export async function applyJobs({ page, model, link }: Params) {
   await page.goto(link);
 
-  await wait(2000);
+  await wait(1245);
 
   const indeedApplyButton = await page.$("button#indeedApplyButton");
 
