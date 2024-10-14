@@ -119,8 +119,11 @@ export function callServer() {
         targetFilter: (target:any) => target.type() !== "other",
       });
       pageInstance = await browserInstance.newPage();
-      await pageInstance.setUserAgent(userAgent.random().toString())
-
+      //await pageInstance.setViewport({ width: 1920, height: 1080 });
+  
+      await pageInstance.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+      );
       await pageInstance.goto("https://www.linkedin.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });

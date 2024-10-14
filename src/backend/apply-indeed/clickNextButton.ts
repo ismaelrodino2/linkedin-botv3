@@ -10,16 +10,19 @@ async function clickNextButton(page: Page): Promise<void> {
     // Seleciona todos os botões dentro de .ia-BasePage-footer (não importa o quão profundos eles estejam)
     const buttons = await page.$$(".ia-BasePage-footer button");
 
-    console.log("buttons ia-BasePage-footer", buttons)
+    console.log("buttons ia-BasePage-footer", buttons);
 
     for (const button of buttons) {
-      const isVisible = await button.evaluate((el) => {
+      const isVisibleAndHasText = await button.evaluate((el) => {
         const style = window.getComputedStyle(el);
-        return style && style.display !== 'none';
+        const hasText =
+          el.innerText.includes("Continuar") ||
+          el.textContent?.includes("Continuar");
+        return style && style.display !== "none" && hasText;
       });
-    
-      if (isVisible) {
-        console.log("clicando....")
+
+      if (isVisibleAndHasText) {
+        console.log("clicando....");
         await button.click();
       }
     }

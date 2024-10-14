@@ -8,7 +8,7 @@ export async function fillCv(page: Page): Promise<void> {
     const textContent = await docDiv.evaluate((el) => el.innerText || "");
 
     // Verifica se o texto não contém "mycvux_en.pdf"
-    if (textContent && !textContent.includes("restauração_cv.pdf")) {
+    if (textContent && textContent.includes("restauração_cv.pdf")) {
       console.log("Texto encontrado:", textContent);
       await docDiv.click()
     }

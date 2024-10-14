@@ -55,7 +55,7 @@ export async function fillTextAreas(page: Page, model: GenerativeModel) {
           console.log("A classe do input não contém nenhum valor conhecido."); //usar AI
           console.log(`O input já contém texto: ${textAreaValue}`);
 
-          const prompt = `${globalPrompt}. The following form item is an textarea with a label: ${associatedLabel}. Write the the correct answer. Be concise. Never use [company name], or other incomplete phrases. Always fill in something, as this message will be sent directly, without editing. When you don't know the names, use something generic.`;
+          const prompt = `${globalPrompt}. The following form item is an textarea with a label: ${associatedLabel}. Write the the correct answer. Be concise. Write complete and specific sentences without using placeholders or generic terms that need to be filled in later. Each sentence should be clear and self-sufficient, with all necessary information already included. Always fill in something, as this message will be sent directly, without editing. When you don't know the names, use something generic.`;
 
           const result = await model.generateContent(prompt);
 

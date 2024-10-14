@@ -16,11 +16,11 @@ export async function applyScriptIndeed(page: Page, model: GenerativeModel) {
 
   for (const link of validLinks) {
     await sleep(1000);
-    const button = await page.$('.dd-privacy-allow button');
+    // const button = await page.$('.dd-privacy-allow button');
 
-    if(button){
-      await button.click()
-    }
+    // if(button){
+    //   await button.click()
+    // }
 
     if (link) {
       console.log("indo para link",link)

@@ -60,6 +60,7 @@ export async function applyJobs({ page, model, link }: Params) {
 
       // Se a candidatura foi submetida, encerra todos os loops
       if (submitted) {
+        console.log("tem o botão de submit")
         maxPages = 0;
         break;
       }
@@ -73,17 +74,12 @@ export async function applyJobs({ page, model, link }: Params) {
 
       await sleep(1000);
     }
-    const submitted = await checkandSubmit(page);
-
-    // Se a candidatura foi submetida, encerra todos os loops
-    if (submitted) {
-      maxPages = 0;
-    }
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
   }
 }
+
 async function checkandSubmit(page: Page) {
   try {
     const buttons = await page.$$("main .ia-BasePage-footer button");
@@ -97,10 +93,13 @@ async function checkandSubmit(page: Page) {
       }
     }
 
-    console.log("Submitting application at");
+    console.log("Submitting application at", submitButton);
     if (submitButton.length > 0) {
+      console.log("submitButton exists")
       // Clica nos botões filtrados
-      await Promise.all(submitButton.map((button) => button.click()));
+      for (const button of submitButton) {
+        await button.click()
+      }
       await wait(2500); // aguarda antes de prosseguir
 
       // Retorna true para indicar que a candidatura foi enviada
