@@ -5,6 +5,7 @@ import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
 import { wait } from "../generate-links";
 import { sleep } from "../../callserver";
+import { JobInfo } from "../apply-script-indeed";
 
 const noop = () => {};
 
@@ -25,12 +26,15 @@ interface Params {
   page: Page;
   link: string;
   model: GenerativeModel;
+  addJobToArray: (el: JobInfo) => void;
 }
 
-export async function applyJobs({ page, model, link }: Params) {
+export async function applyJobs({ page, model, link, addJobToArray }: Params) {
   await page.goto(link);
 
   await wait(1245);
+
+  const fields = await getJobInfo(page);
 
   const indeedApplyButton = await page.$("button#indeedApplyButton");
 
@@ -38,10 +42,8 @@ export async function applyJobs({ page, model, link }: Params) {
   console.log("html button", html);
 
   console.log("indeedApplyButton:", indeedApplyButton);
-  console.log("Applying to1", link);
 
   await indeedApplyButton?.click();
-  console.log("Applying to2", link);
 
   // Verificar a barra de progresso inicial
   // bar1 = await checkProgressBar(page) ?? 0;
@@ -60,7 +62,7 @@ export async function applyJobs({ page, model, link }: Params) {
 
       // Se a candidatura foi submetida, encerra todos os loops
       if (submitted) {
-        console.log("tem o botão de submit")
+        console.log("tem o botão de submit");
         maxPages = 0;
         break;
       }
@@ -70,9 +72,11 @@ export async function applyJobs({ page, model, link }: Params) {
 
       await sleep(1000);
 
-      await clickNextButton(page); //to-do: nao esta nem chamando aqui
+      await clickNextButton(page);
 
       await sleep(1000);
+
+      addJobToArray(fields);
     }
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
@@ -95,10 +99,10 @@ async function checkandSubmit(page: Page) {
 
     console.log("Submitting application at", submitButton);
     if (submitButton.length > 0) {
-      console.log("submitButton exists")
+      console.log("submitButton exists");
       // Clica nos botões filtrados
       for (const button of submitButton) {
-        await button.click()
+        await button.click();
       }
       await wait(2500); // aguarda antes de prosseguir
 
@@ -111,4 +115,60 @@ async function checkandSubmit(page: Page) {
     console.log("Error applying to:", error);
     return false; // Retorna false em caso de erro
   }
+}
+
+async function getJobInfo(page: Page) {
+  const asideElements = await page.$$(
+    'aside[aria-labelledby="ia-JobInfoCard-header-title"] span'
+  );
+
+  const position = await page.evaluate(
+    (span) => span.innerText,
+    asideElements[0]
+  );
+  const companyAndLocation = await page.evaluate(
+    (span) => span.innerText,
+    asideElements[1]
+  );
+
+  const parts = companyAndLocation.split(" - ");
+
+  // Accessing the separated parts
+  const company = parts[0]; // "Grupo Mec"
+  const location = parts[1]; // "Rio de Janeiro, RJ"
+
+  const currentDateTime = new Date();
+
+  const buttonElement = await page.$(
+    'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
+  );
+
+  let language: string | null = null;
+
+  if (buttonElement) {
+    const spanText = await page.evaluate(
+      (span) => span.innerText,
+      buttonElement
+    );
+    console.log("Span text:", spanText);
+
+    const languageMap: { [key: string]: string } = {
+      Sair: "Portuguese",
+      Exit: "English",
+    };
+
+    // Use a type assertion to indicate spanText is one of the keys in the languageMap
+    language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
+  } else {
+    console.log("Button with specified data-testid not found");
+  }
+
+  return {
+    position,
+    company,
+    location,
+    currentDateTime,
+    platform: "Indeed",
+    language,
+  };
 }

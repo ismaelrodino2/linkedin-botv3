@@ -7,6 +7,7 @@ import { sleep } from "../../../callserver";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
+import { JobInfo } from "../../../apply-indeed/apply-script-indeed";
 
 const noop = () => {};
 
@@ -46,12 +47,21 @@ interface Params {
   page: Page;
   link: string;
   model: GenerativeModel;
+  addJobToArray: (el: JobInfo) => void;
 }
 
-export async function applyJobs({ page, model, link }: Params) {
+export async function applyJobs({ page, model, link, addJobToArray }: Params) {
   let bar1 = 0;
   let bar2 = 0;
   await page.goto(link, { waitUntil: "load", timeout: 30000 });
+
+  let language: string | null = null; // Initialize language to null
+
+  function setLanguage(lang: string) {
+    language = lang;
+  }
+
+  const fields = await getJobInfo(page);
 
   // Verificar a barra de progresso inicial
   bar1 = await checkProgressBar(page);
@@ -67,7 +77,7 @@ export async function applyJobs({ page, model, link }: Params) {
     // let maxTries = 2;
     while (maxPages--) {
       await sleep(800);
-      await fillFields(page, model).catch(noop);
+      await fillFields(page, model, setLanguage).catch(noop);
 
       await clickNextButton(page).catch(noop);
 
@@ -94,6 +104,12 @@ export async function applyJobs({ page, model, link }: Params) {
         await submitButton.click();
         await wait(2500);
       }
+      // Add job to array if language is set
+      if (language) {
+        addJobToArray({ ...fields, language });
+      } else {
+        console.log("Language not set, job not added to array");
+      }
     } catch (error) {
       console.log("Error applying to:", link, error);
     }
@@ -101,4 +117,67 @@ export async function applyJobs({ page, model, link }: Params) {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
   }
+}
+
+async function getJobInfo(page: Page) {
+  const asideElements = await page.$(
+    "job-details-jobs-unified-top-card__job-title h1"
+  );
+
+  const companyNameElement = await page.$(
+    "job-details-jobs-unified-top-card__company-name > a"
+  );
+
+  const firstSpanElement = await page.$(
+    "job-details-jobs-unified-top-card__primary-description-container > div span:first-child"
+  );
+
+  const position = await page.evaluate(
+    (span) => span?.innerText,
+    asideElements
+  );
+
+  const company = await page.evaluate(
+    (element) => element?.innerText,
+    companyNameElement
+  );
+  const location = await page.evaluate(
+    (element) => element?.innerText,
+    firstSpanElement
+  );
+
+  const currentDateTime = new Date();
+
+  const buttonElement = await page.$(
+    'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
+  );
+
+  let language: string | null = null;
+
+  if (buttonElement) {
+    const spanText = await page.evaluate(
+      (span) => span.innerText,
+      buttonElement
+    );
+    console.log("Span text:", spanText);
+
+    const languageMap: { [key: string]: string } = {
+      Sair: "Portuguese",
+      Exit: "English",
+    };
+
+    // Use a type assertion to indicate spanText is one of the keys in the languageMap
+    language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
+  } else {
+    console.log("Button with specified data-testid not found");
+  }
+
+  return {
+    position,
+    company,
+    location,
+    currentDateTime,
+    platform: "Indeed",
+    language,
+  };
 }
