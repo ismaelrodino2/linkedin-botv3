@@ -4,8 +4,7 @@ import { fillFields } from "../fill-fields";
 import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
 import { wait } from "../generate-links";
-import { sleep } from "../../callserver";
-import { JobInfo } from "../apply-script-indeed";
+import { JobInfo, sleep } from "../../callserver";
 
 const noop = () => {};
 
@@ -26,10 +25,10 @@ interface Params {
   page: Page;
   link: string;
   model: GenerativeModel;
-  addJobToArray: (el: JobInfo) => void;
+  addJobToArrayIndeed: (el: JobInfo) => void;
 }
 
-export async function applyJobs({ page, model, link, addJobToArray }: Params) {
+export async function applyJobs({ page, model, link, addJobToArrayIndeed }: Params) {
   await page.goto(link);
 
   await wait(1245);
@@ -76,7 +75,7 @@ export async function applyJobs({ page, model, link, addJobToArray }: Params) {
 
       await sleep(1000);
 
-      addJobToArray(fields);
+      addJobToArrayIndeed(fields);
     }
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);

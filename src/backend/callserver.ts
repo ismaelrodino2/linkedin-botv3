@@ -9,7 +9,15 @@ import { wait } from "./apply-linkedin/scripts/generate-links";
 import { Request, Response } from "express";
 import { applyScriptIndeed } from "./apply-indeed/apply-script-indeed";
 import { navigateToNextPage } from "./apply-linkedin/scripts/generate-pagination-links";
-import { navigateToNextPageIndeed } from "./apply-indeed/generate-pagination-links";
+
+export type JobInfo = {
+  position?: string;
+  company?: string;
+  location?: string;
+  currentDateTime?: Date;
+  platform?: string;
+  language?: string | null;
+};
 
 config();
 
@@ -82,6 +90,9 @@ async function scrollToBottomAndBackSmoothly(
 }
 
 export function callServer() {
+  const appliedJobsIndeed: JobInfo[] = []; //will come from api
+  const appliedJobsLinkedin: JobInfo[] = []; //will come from api
+
   const app = express();
   const port = 3000;
 
@@ -103,7 +114,7 @@ export function callServer() {
   app.post("/navigate", async (req: Request, res: Response) => {
     try {
       const puppeteer = require("puppeteer-extra");
-      var userAgent = require('user-agents');
+      var userAgent = require("user-agents");
 
       // add stealth plugin and use defaults (all evasion techniques)
       const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -116,13 +127,13 @@ export function callServer() {
         executablePath: executablePath(),
         userDataDir: "./userDataDir",
         args: ["--disable-features=site-per-process"],
-        targetFilter: (target:any) => target.type() !== "other",
+        targetFilter: (target: any) => target.type() !== "other",
       });
       pageInstance = await browserInstance.newPage();
       //await pageInstance.setViewport({ width: 1920, height: 1080 });
-  
+
       await pageInstance.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
       );
       await pageInstance.goto("https://www.linkedin.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
@@ -137,47 +148,57 @@ export function callServer() {
 
   //linkedin
   app.post("/apply-linkedin", async (req: Request, res: Response) => {
-    const maxPaginations = 4;
-    console.log("pageInstance", pageInstance);
-    for (let i = 0; i < maxPaginations; i++) {
+    const maxIterations = 4; //decided for us, number around 150 iterations for paid
+
+    console.log("browserInstance", pageInstance);
+
+    function addJobToArrayLinkedin(el: JobInfo) {
+      appliedJobsLinkedin.push(el);
+    }
+
+    while (appliedJobsIndeed.length < maxIterations) {
       try {
-        console.log(`Loop iteration: ${i}`);
         await sleep(1000);
         await scrollToBottomAndBackSmoothly(
           pageInstance,
           ".jobs-search-results-list"
         );
         await sleep(600);
-        await applyScript(pageInstance, model);
+        await applyScript(pageInstance, model, addJobToArrayLinkedin);
         await sleep(600);
         await navigateToNextPage(pageInstance, 25);
         await sleep(600);
       } catch (error) {
-        console.error(`Error in loop iteration ${i}:`, error);
+        console.error(`Error Linkedin`, error);
       }
     }
   });
 
   //indeed
   app.post("/apply-indeed", async (req: Request, res: Response) => {
-    const maxPaginations = 4;
+    const maxIterations = 4; //decided for us, number around 150 iterations for paid
 
     console.log("browserInstance", pageInstance);
 
-    for (let i = 0; i < maxPaginations; i++) {
+    function addJobToArrayIndeed(el: JobInfo) {
+      appliedJobsIndeed.push(el);
+    }
+
+    while (appliedJobsIndeed.length < maxIterations) {
       try {
         // console.log(`Loop iteration: ${i}`);
         await sleep(1000);
         // await scrollToBottomAndBackSmoothly(pageInstance, ".js-focus-visible");
         await sleep(600);
-        await applyScriptIndeed(pageInstance, model);
+        await applyScriptIndeed(pageInstance, model, addJobToArrayIndeed);
         await sleep(1000);
         // await navigateToNextPageIndeed(pageInstance);
         await sleep(600);
       } catch (error) {
         // console.error(`Error in loop iteration ${i}:`, error);
       }
-     }
+    }
+    console.log("jobs aplicados:", appliedJobsIndeed)
   });
 
   const server = app.listen(port, () => {

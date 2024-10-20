@@ -2,7 +2,7 @@ import { GenerativeModel } from "@google/generative-ai";
 import { Page } from "puppeteer";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
-import { JobInfo } from "../../apply-indeed/apply-script-indeed";
+import { JobInfo } from "../../callserver";
 
 async function clickDismissButton(page: Page) {
   try {
@@ -20,7 +20,7 @@ async function clickDismissButton(page: Page) {
   }
 }
 
-export async function applyScript(page: Page, model: GenerativeModel) {
+export async function applyScript(page: Page, model: GenerativeModel, addJobToArrayIndeed: (jobs: JobInfo)=>void) {
   const validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);
@@ -30,20 +30,13 @@ export async function applyScript(page: Page, model: GenerativeModel) {
     return; // Ou outra lógica que você queira implementar
   }
 
-  const appliedJobs: JobInfo[] = [];
-
-  function addJobToArray(el: JobInfo) {
-    appliedJobs.push(el);
-  }
-
   for (const link of validLinks) {
     await wait(1000);
     if (link) {
-      await applyJobs({ link, model, page, addJobToArray });
+      await applyJobs({ link, model, page, addJobToArrayIndeed });
       await wait(2000);
       await clickDismissButton(page);
       await wait(1000);
     }
   }
-  console.log("appliedJobs linkedin", appliedJobs);
 }

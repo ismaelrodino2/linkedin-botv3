@@ -3,11 +3,10 @@ import { Page } from "puppeteer";
 import { fillFields } from "../fill-fields";
 import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
-import { sleep } from "../../../callserver";
+import { JobInfo, sleep } from "../../../callserver";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
-import { JobInfo } from "../../../apply-indeed/apply-script-indeed";
 
 const noop = () => {};
 
@@ -47,10 +46,15 @@ interface Params {
   page: Page;
   link: string;
   model: GenerativeModel;
-  addJobToArray: (el: JobInfo) => void;
+  addJobToArrayIndeed: (el: JobInfo) => void;
 }
 
-export async function applyJobs({ page, model, link, addJobToArray }: Params) {
+export async function applyJobs({
+  page,
+  model,
+  link,
+  addJobToArrayIndeed,
+}: Params) {
   let bar1 = 0;
   let bar2 = 0;
   await page.goto(link, { waitUntil: "load", timeout: 30000 });
@@ -106,7 +110,7 @@ export async function applyJobs({ page, model, link, addJobToArray }: Params) {
       }
       // Add job to array if language is set
       if (language) {
-        addJobToArray({ ...fields, language });
+        addJobToArrayIndeed({ ...fields, language });
       } else {
         console.log("Language not set, job not added to array");
       }
