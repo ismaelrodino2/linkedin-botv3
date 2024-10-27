@@ -1,7 +1,8 @@
 import { ElementHandle, Page } from "puppeteer";
 import { selectors } from "../selectors";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function fillCv(page: Page, setLanguage: (lang:string)=>void): Promise<void> {
+export async function fillCv(page: PageWithCursor): Promise<void> {
   const docDivs = await page.$$(selectors.documentUpload);
 
   // Obtenha todos os elementos de rótulo ou span dentro do formulário
@@ -23,10 +24,10 @@ export async function fillCv(page: Page, setLanguage: (lang:string)=>void): Prom
   for (const docDiv of docDivs) {
     const label = (await docDiv.$(
       selectors.documentUploadLabel
-    )) as ElementHandle<HTMLElement>;
+    )) as unknown as ElementHandle<HTMLElement>;
     const input = (await docDiv.$(
       selectors.documentUploadInput
-    )) as ElementHandle<HTMLInputElement>;
+    )) as unknown as ElementHandle<HTMLInputElement>;
 
     const text = (
       await label.evaluate((el) => el.innerText.trim())
@@ -36,12 +37,10 @@ export async function fillCv(page: Page, setLanguage: (lang:string)=>void): Prom
     if (text.includes("resume")) {
       if (foundTextCvPt) {
         // pt resume
-        setLanguage("Portuguese")
         console.log("Uploading Portuguese resume: uploads/cv-pt.pdf");
         await input.uploadFile("uploads/cv-pt.pdf");
       } else {
         // en resume
-        setLanguage("English")
         console.log("Uploading English resume: uploads/cv-en.pdf");
         await input.uploadFile("uploads/cv-en.pdf");
       }

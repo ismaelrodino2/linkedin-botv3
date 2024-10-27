@@ -7,10 +7,12 @@ import { JobInfo, sleep } from "../../../callserver";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
+import { PageWithCursor } from "puppeteer-real-browser";
+import LanguageDetect from "languagedetect";
 
 const noop = () => {};
 
-async function clickApplyButton(page: Page): Promise<void> {
+async function clickApplyButton(page: PageWithCursor): Promise<void> {
   try {
     const buttonText = await page.evaluate((applyButtonSelector) => {
       const button = document.querySelector(applyButtonSelector);
@@ -43,34 +45,57 @@ export interface ApplicationFormData {
 }
 
 interface Params {
-  page: Page;
+  page: PageWithCursor;
   link: string;
   model: GenerativeModel;
-  addJobToArrayIndeed: (el: JobInfo) => void;
+  addJobToArrayLinkedin: (el: JobInfo) => void;
 }
 
 export async function applyJobs({
   page,
   model,
   link,
-  addJobToArrayIndeed,
+  addJobToArrayLinkedin,
 }: Params) {
   let bar1 = 0;
   let bar2 = 0;
   await page.goto(link, { waitUntil: "load", timeout: 30000 });
 
-  let language: string | null = null; // Initialize language to null
+  const lngDetector = new LanguageDetect();
 
-  function setLanguage(lang: string) {
-    language = lang;
+  // OR
+  // const lngDetector = new (require('languagedetect'));
+
+  const jobDescriptionText = await page.$$eval(
+    ".jobs-box__html-content .text-heading-large .mt4 > p[dir='ltr'] span",
+    (spans) => spans.map((span) => span.textContent?.trim()).join(" ")
+  );
+  let language: string = "en"; // Default to 'en' or another default language of your choice
+
+  console.log("todas strings linkedin lang", jobDescriptionText);
+  if (jobDescriptionText) {
+    const lang = lngDetector.detect(jobDescriptionText, 1);
+
+    console.log("lang", lang);
+
+    language = lang[0][0] as string;
   }
 
-  const fields = await getJobInfo(page);
+  const fields = await getJobInfo(page, language);
+
+  //erro to-do:   position: undefined,
+  // company: undefined,
+  // location: undefined,
+  // currentDateTime: 2024-10-26T22:28:46.553Z,
+  // platform: 'Linkedin',
+  // language: 'en'
+
+  console.log("todos valores de linkedin", fields);
 
   // Verificar a barra de progresso inicial
   bar1 = await checkProgressBar(page);
 
-  await sleep(3000);
+  await sleep(600);
   try {
     console.log("Applying to", link);
     // [TODO] change this var
@@ -80,50 +105,45 @@ export async function applyJobs({
     let maxPages = 7;
     // let maxTries = 2;
     while (maxPages--) {
-      await sleep(800);
-      await fillFields(page, model, setLanguage).catch(noop);
-
-      await clickNextButton(page).catch(noop);
+      await sleep(350);
+      await fillFields(page, model).catch(noop);
 
       // Verificar a barra de progresso após clicar no botão "Next"
       bar2 = await checkProgressBar(page);
 
+      await clickNextButton(page).catch(noop);
+
       // Comparar se a barra de progresso mudou
       if (bar1 === bar2) {
         console.log("Progress bar did not change, breaking loop...");
-        const isSubmitButton = page.$(
+        const isSubmitButtonEn = page.$(
           ".jobs-easy-apply-content button[aria-label='Submit application']"
         );
-        if (!isSubmitButton) {
+        const isSubmitButtonPt = page.$(
+          ".jobs-easy-apply-content button[aria-label='Enviar candidatura']"
+        );
+        if (!isSubmitButtonEn || !isSubmitButtonPt) {
+          console.log("teste aqui 123321")
           break; // Se o valor não mudou, sai do loop
         }
       }
     }
-    try {
-      const submitButton = await page.$(selectors.submit);
-      console.log("Submitting application at", link);
-      if (!submitButton) {
-        return;
-      } else {
-        await submitButton.click();
-        await wait(2500);
-      }
-      // Add job to array if language is set
-      if (language) {
-        addJobToArrayIndeed({ ...fields, language });
-      } else {
-        console.log("Language not set, job not added to array");
-      }
-    } catch (error) {
-      console.log("Error applying to:", link, error);
-    }
+
+    addJobToArrayLinkedin({
+      company: "test",
+      currentDateTime: new Date(),
+      language: language,
+      location: "test",
+      platform: "test",
+      position: "test"
+    })
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
   }
 }
 
-async function getJobInfo(page: Page) {
+async function getJobInfo(page: PageWithCursor, language: string) {
   const asideElements = await page.$(
     "job-details-jobs-unified-top-card__job-title h1"
   );
@@ -152,36 +172,12 @@ async function getJobInfo(page: Page) {
 
   const currentDateTime = new Date();
 
-  const buttonElement = await page.$(
-    'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
-  );
-
-  let language: string | null = null;
-
-  if (buttonElement) {
-    const spanText = await page.evaluate(
-      (span) => span.innerText,
-      buttonElement
-    );
-    console.log("Span text:", spanText);
-
-    const languageMap: { [key: string]: string } = {
-      Sair: "Portuguese",
-      Exit: "English",
-    };
-
-    // Use a type assertion to indicate spanText is one of the keys in the languageMap
-    language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
-  } else {
-    console.log("Button with specified data-testid not found");
-  }
-
   return {
     position,
     company,
     location,
     currentDateTime,
-    platform: "Indeed",
+    platform: "Linkedin",
     language,
   };
 }

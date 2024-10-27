@@ -1,4 +1,3 @@
-import { Page } from "puppeteer";
 import { GenerativeModel } from "@google/generative-ai";
 import { fillCv } from "./fills/fill-cv";
 import { fillFieldSet } from "./fills/fill-field-set";
@@ -6,9 +5,11 @@ import { fillTextAreas } from "./fills/fill-text-areas";
 import { fillSelects } from "./fills/fill-selects";
 import { fillInputs } from "./fills/fill-inputs";
 import { sleep } from "../callserver";
+import { PageWithCursor } from "puppeteer-real-browser";
+import { fillInputNumber } from "./fills/fill-input-number";
 
 
-export async function fillFields(page: Page, model: GenerativeModel) {
+export async function fillFields(page: PageWithCursor, model: GenerativeModel) {
 
   await sleep(1000)
   try {
@@ -41,6 +42,12 @@ export async function fillFields(page: Page, model: GenerativeModel) {
 
   try {
     await fillCv(page)
+  } catch (error) {
+    console.error("Erro ao preencher text areas:", error);
+  }
+
+  try {
+    await fillInputNumber(page, model)
   } catch (error) {
     console.error("Erro ao preencher text areas:", error);
   }

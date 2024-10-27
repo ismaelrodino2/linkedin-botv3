@@ -1,12 +1,13 @@
-import { ElementHandle, Page } from "puppeteer";
+import { ElementHandle } from "puppeteer";
 import { knownFields } from "./known-fields";
+import { PageWithCursor } from "puppeteer-real-browser";
 
 export const wait = (time: number) =>
   new Promise((resolve) => setTimeout(resolve, time));
 
 // Função para rolar suavemente até o final de um contêiner
 
-export async function generateLinks(page: Page) {
+export async function generateLinks(page: PageWithCursor) {
   // Seleciona todos os <li> dentro de um ul com a classe 'scaffold-layout__list-container'
   const allLis = await page.$$("#mosaic-provider-jobcards > ul > li");
 
@@ -16,15 +17,16 @@ export async function generateLinks(page: Page) {
 
   // Filtrando os elementos que contêm os textos desejados
   for (const el of allLis) {
-    const text = await el.evaluate((el) => el.innerText || el.textContent || "");
+    const text = await el.evaluate(
+      (el) => el.innerText || el.textContent || ""
+    );
 
     if (knownFields.easyApply.some((field) => text.includes(field))) {
-      filteredLis.push(el);
+      filteredLis.push(el as unknown as ElementHandle<HTMLLIElement>);
     } else {
       console.log("Elemento LI não possui o texto desejado");
     }
   }
-
 
   const links: string[] = [];
 
@@ -34,7 +36,6 @@ export async function generateLinks(page: Page) {
       (li) => {
         const anchor = li.querySelector("a.jcs-JobTitle") as HTMLAnchorElement;
         const viewLink = anchor ? anchor.href : null;
-
 
         return viewLink;
       },

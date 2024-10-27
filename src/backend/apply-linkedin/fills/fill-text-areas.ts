@@ -1,11 +1,11 @@
 import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
 import { valuesConfig } from "../config";
-import { globalPrompt } from "../../prompt";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function fillTextAreas(page: Page, model: GenerativeModel) {
+export async function fillTextAreas(page: PageWithCursor, model: GenerativeModel) {
   const textAreas = await page.$$(".jobs-easy-apply-content form textarea");
 
   console.log("textAreas123", textAreas);

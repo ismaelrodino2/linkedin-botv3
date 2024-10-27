@@ -3,15 +3,10 @@ import { Page } from "puppeteer";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
 import { JobInfo } from "../../callserver";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-async function clickDismissButton(page: Page) {
+async function clickDismissButton(page: PageWithCursor) {
   try {
-    // Aguarda que o botão esteja disponível na página
-    await page.waitForSelector(
-      '[aria-labelledby="post-apply-modal"] button[aria-label="Dismiss"]',
-      { timeout: 5000 }
-    );
-
     // Seleciona o botão e clica nele
     await page.click('button[aria-label="Dismiss"]');
     console.log("Dismiss button clicked.");
@@ -20,7 +15,7 @@ async function clickDismissButton(page: Page) {
   }
 }
 
-export async function applyScript(page: Page, model: GenerativeModel, addJobToArrayIndeed: (jobs: JobInfo)=>void) {
+export async function applyScript(page: PageWithCursor, model: GenerativeModel, addJobToArrayLinkedin: (jobs: JobInfo)=>void, appliedJobsLinkedin: JobInfo[], maxIterations: number) {
   const validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);
@@ -31,12 +26,16 @@ export async function applyScript(page: Page, model: GenerativeModel, addJobToAr
   }
 
   for (const link of validLinks) {
-    await wait(1000);
+    if (appliedJobsLinkedin.length >= maxIterations) {
+      // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
+      break;
+    }
+    await wait(350);
     if (link) {
-      await applyJobs({ link, model, page, addJobToArrayIndeed });
-      await wait(2000);
+      await applyJobs({ link, model, page, addJobToArrayLinkedin });
+      await wait(200);
       await clickDismissButton(page);
-      await wait(1000);
+      await wait(350);
     }
   }
 }

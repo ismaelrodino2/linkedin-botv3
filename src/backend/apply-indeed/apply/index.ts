@@ -5,6 +5,9 @@ import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
 import { wait } from "../generate-links";
 import { JobInfo, sleep } from "../../callserver";
+import { PageWithCursor } from "puppeteer-real-browser";
+import { setPromptLanguage } from "../../prompt";
+import LanguageDetect from "languagedetect";
 
 const noop = () => {};
 
@@ -22,20 +25,54 @@ export interface ApplicationFormData {
 }
 
 interface Params {
-  page: Page;
+  page: PageWithCursor;
   link: string;
   model: GenerativeModel;
   addJobToArrayIndeed: (el: JobInfo) => void;
 }
 
-export async function applyJobs({ page, model, link, addJobToArrayIndeed }: Params) {
+export async function applyJobs({
+  page,
+  model,
+  link,
+  addJobToArrayIndeed,
+}: Params) {
+  let language: string = "en"; // Inicializa a variável com uma string vazia
   await page.goto(link);
+  console.log("chegou na pagina123"); //erro por aqui
 
   await wait(1245);
 
-  const fields = await getJobInfo(page);
+  // Extrai o texto do primeiro filho do elemento #jobDescriptionText
+  const jobDescriptionText = await page.evaluate(() => {
+    const element = document.querySelector("#jobDescriptionText");
+    if (element && element.firstElementChild) {
+      return element.firstElementChild.textContent?.trim();
+    }
+    return null; // Retorna null se o elemento ou o primeiro filho não existir
+  });
+
+  console.log("Texto extraído:", jobDescriptionText);
+
+  const lngDetector = new LanguageDetect();
+
+  // OR
+  // const lngDetector = new (require('languagedetect'));
+
+  if (jobDescriptionText) {
+    const lang = lngDetector.detect(jobDescriptionText, 1);
+
+    console.log("lang", lang);
+
+    setPromptLanguage(lang[0][0]);
+    language = lang[0][0]
+  }
+
+  console.log("chegou na pagina"); //erro por aqui
 
   const indeedApplyButton = await page.$("button#indeedApplyButton");
+
+  console.log("vendo se indeedApplyButton existe", indeedApplyButton);
 
   const html = await indeedApplyButton?.evaluate((el) => el.outerHTML);
   console.log("html button", html);
@@ -48,6 +85,9 @@ export async function applyJobs({ page, model, link, addJobToArrayIndeed }: Para
   // bar1 = await checkProgressBar(page) ?? 0;
 
   await sleep(3000);
+
+  //const fields = await getJobInfo(page); //erro por aqui -> acho q essa função ta trancando tudo pq ele n ta precionando o botão p aplicar na vaga
+
   try {
     console.log("Applying to", link);
     // [TODO] change this var
@@ -57,16 +97,17 @@ export async function applyJobs({ page, model, link, addJobToArrayIndeed }: Para
     let maxPages = 7;
     // let maxTries = 2;
     while (maxPages--) {
-      const submitted = await checkandSubmit(page);
+      await checkandSubmit(page, "Verificar sua candidatura");
+      const submitButton = await checkandSubmit(page, "Enviar sua candidatura");
 
       // Se a candidatura foi submetida, encerra todos os loops
-      if (submitted) {
+      if (submitButton) {
         console.log("tem o botão de submit");
         maxPages = 0;
         break;
       }
 
-      await sleep(1000);
+      await sleep(1000); //to-do: chega no currículo e trava
       await fillFields(page, model).catch(noop);
 
       await sleep(1000);
@@ -74,33 +115,44 @@ export async function applyJobs({ page, model, link, addJobToArrayIndeed }: Para
       await clickNextButton(page);
 
       await sleep(1000);
-
-      addJobToArrayIndeed(fields);
+    
+      // if (fields) {
+      //   addJobToArrayIndeed(fields);
+      // }
     }
+
+    addJobToArrayIndeed({
+      company: "test",
+      currentDateTime: new Date(),
+      language: language,
+      location: "test",
+      platform: "test",
+      position: "test"
+    })
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
   }
 }
 
-async function checkandSubmit(page: Page) {
+async function checkandSubmit(page: PageWithCursor, text: string) {
   try {
     const buttons = await page.$$("main .ia-BasePage-footer button");
 
     // Filtra os botões cujo texto inclui "Enviar sua candidatura"
-    const submitButton = [];
+    const submitVerifyButton = [];
     for (const button of buttons) {
       const buttonText = await button.evaluate((node) => node.innerText.trim());
-      if (buttonText.includes("Enviar sua candidatura")) {
-        submitButton.push(button);
+      if (buttonText.includes(text)) {
+        submitVerifyButton.push(button);
       }
     }
 
-    console.log("Submitting application at", submitButton);
-    if (submitButton.length > 0) {
-      console.log("submitButton exists");
+    console.log("Submitting application at", submitVerifyButton);
+    if (submitVerifyButton.length > 0) {
+      console.log("submitVerifyButton exists");
       // Clica nos botões filtrados
-      for (const button of submitButton) {
+      for (const button of submitVerifyButton) {
         await button.click();
       }
       await wait(2500); // aguarda antes de prosseguir
@@ -116,10 +168,11 @@ async function checkandSubmit(page: Page) {
   }
 }
 
-async function getJobInfo(page: Page) {
+async function getJobInfo(page: PageWithCursor) {
   const asideElements = await page.$$(
     'aside[aria-labelledby="ia-JobInfoCard-header-title"] span'
-  );
+  ); //erro: retornando [] vazio
+  console.log("encontrou o botao1", asideElements);
 
   const position = await page.evaluate(
     (span) => span.innerText,
@@ -141,6 +194,8 @@ async function getJobInfo(page: Page) {
   const buttonElement = await page.$(
     'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
   );
+
+  console.log("encontrou o botao2", buttonElement);
 
   let language: string | null = null;
 

@@ -1,12 +1,12 @@
 import { ElementHandle, Page } from "puppeteer";
-import { globalPrompt } from "../../prompt";
 import { GenerativeModel } from "@google/generative-ai";
+import { PageWithCursor } from "puppeteer-real-browser";
 
 export function trimDots(text: string) {
   return text.replace(/^\.+|\.+$/g, "").trim();
 }
 
-export async function fillFieldSet(page: Page, model: GenerativeModel) {
+export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel) {
   const fieldsets = await page.$$("main fieldset");
 
   console.log("fieldsets", fieldsets);

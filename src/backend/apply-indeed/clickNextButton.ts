@@ -1,7 +1,8 @@
 import { Page } from "puppeteer";
 import { wait } from "./generate-links";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-async function clickNextButton(page: Page): Promise<void> {
+async function clickNextButton(page: PageWithCursor): Promise<void> {
   try {
     wait(2000);
     // Aguarda que o container .ia-BasePage-footer esteja disponível

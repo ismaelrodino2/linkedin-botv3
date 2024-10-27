@@ -1,8 +1,9 @@
 import { Page } from "puppeteer";
+import { PageWithCursor } from "puppeteer-real-browser";
 
 // Função para gerar a próxima URL de paginação e navegar para ela
 export async function navigateToNextPage(
-  page: Page,
+  page: PageWithCursor,
   itemsPerPage: number = 25
 ): Promise<void> {
   // Pega a URL atual do navegador

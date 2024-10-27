@@ -1,12 +1,12 @@
 import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
-import { globalPrompt } from "../../prompt";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { trimDots } from "./fill-field-set";
 import { valuesConfig } from "../config";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function fillInputs(page: Page, model: GenerativeModel) {
+export async function fillInputs(page: PageWithCursor, model: GenerativeModel) {
   const textInputs = await page.$$(
     '.jobs-easy-apply-content form input[type="text"]'
   );

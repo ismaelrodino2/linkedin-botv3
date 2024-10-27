@@ -6,9 +6,10 @@ import { fillSelects } from "../fills/fill-selects";
 import { fillTextAreas } from "../fills/fill-text-areas";
 import { fillCv } from "../fills/fill-cv";
 import { wait } from "./generate-links";
+import { PageWithCursor } from "puppeteer-real-browser";
 
 // Função para simular movimentos aleatórios do mouse
-async function moveMouseRandomly(page: Page) {
+async function moveMouseRandomly(page: PageWithCursor) {
   const x = Math.floor(Math.random() * 1920); // Largura da tela (exemplo de largura comum)
   const y = Math.floor(Math.random() * 1080); // Altura da tela (exemplo de altura comum)
 
@@ -19,7 +20,7 @@ async function moveMouseRandomly(page: Page) {
   await wait(Math.random() * 500 + 200); // Entre 200ms e 700ms
 }
 
-export async function fillFields(page: Page, model: GenerativeModel, setLanguage: (lang:string)=>void) {
+export async function fillFields(page: PageWithCursor, model: GenerativeModel) {
   try {
     await fillFieldSet(page, model);
     await moveMouseRandomly(page); // Movimento aleatório do mouse
@@ -49,7 +50,7 @@ export async function fillFields(page: Page, model: GenerativeModel, setLanguage
   }
 
   try {
-    await fillCv(page, setLanguage);
+    await fillCv(page);
     await moveMouseRandomly(page); // Movimento aleatório do mouse
   } catch (error) {
     console.error("Erro ao preencher CV:", error);

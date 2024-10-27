@@ -1,11 +1,11 @@
 import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
-import { globalPrompt } from "../../prompt";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { trimDots } from "./fill-field-set";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function fillSelects(page: Page, model: GenerativeModel) {
+export async function fillSelects(page: PageWithCursor, model: GenerativeModel) {
   const selects = await page.$$("main form select");
 
   if (selects.length > 0) {

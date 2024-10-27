@@ -3,34 +3,31 @@ import { Page } from "puppeteer";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
 import { JobInfo, sleep } from "../callserver";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-
-
-export async function applyScriptIndeed(page: Page, model: GenerativeModel, addJobToArrayIndeed: (jobs: JobInfo)=>void) {
+export async function applyScriptIndeed(
+  page: PageWithCursor,
+  model: GenerativeModel,
+  addJobToArrayIndeed: (jobs: JobInfo) => void,
+  appliedJobsIndeed: JobInfo[],
+  maxIterations: number
+) {
   const validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);
 
-  // if (validLinks.length === 0) {
-  //   console.log("No valid links found. Skipping applyJobs.");
-  //   return; // Ou outra lógica que você queira implementar
-  // }
-
   for (const link of validLinks) {
-    await sleep(1000);
-    // const button = await page.$('.dd-privacy-allow button');
+    await sleep(350);
 
-    // if(button){
-    //   await button.click()
-    // }
-
-
+    if (appliedJobsIndeed.length >= maxIterations) {
+      // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
+      break;
+    }
 
     if (link) {
       console.log("indo para link", link);
       await applyJobs({ link, model, page, addJobToArrayIndeed });
-      await sleep(1000);
-      //await clickDismissButton(page);
+      await sleep(350);
     }
   }
 }

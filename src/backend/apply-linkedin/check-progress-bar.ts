@@ -1,6 +1,7 @@
 import { Page } from "puppeteer";
+import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function checkProgressBar(page: Page): Promise<number> {
+export async function checkProgressBar(page: PageWithCursor): Promise<number> {
     const progressBar = await page.$(".jobs-easy-apply-content progress");
     const progressValue = await progressBar?.evaluate(el => el.value); // Pega o valor diretamente
     console.log("Valor da progress bar:", progressValue);
