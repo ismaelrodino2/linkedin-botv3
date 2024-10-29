@@ -2,10 +2,10 @@ import { GenerativeModel } from "@google/generative-ai";
 import { generateLinks } from "./generate-links";
 import { applyJobs } from "./apply";
 import { JobInfo, sleep } from "../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
 export async function applyScriptIndeed(
-  page: PageWithCursor,
+  page: Page,
   model: GenerativeModel,
   addJobToArrayIndeed: (jobs: JobInfo) => void,
   appliedJobsIndeed: JobInfo[],

@@ -1,12 +1,11 @@
-import { Page } from "puppeteer";
 import { knownFields } from "../../apply-linkedin/known-fields";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { trimDots } from "../../apply-linkedin/fills/fill-field-set";
 import { valuesConfig } from "../../apply-linkedin/config";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillInputNumber(page: PageWithCursor, model: GenerativeModel) {
+export async function fillInputNumber(page: Page, model: GenerativeModel) {
   const numberInputs = await page.$$(
     'main input[type="number"]'
   );

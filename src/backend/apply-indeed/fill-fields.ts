@@ -5,11 +5,11 @@ import { fillTextAreas } from "./fills/fill-text-areas";
 import { fillSelects } from "./fills/fill-selects";
 import { fillInputs } from "./fills/fill-inputs";
 import { sleep } from "../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 import { fillInputNumber } from "./fills/fill-input-number";
 
 
-export async function fillFields(page: PageWithCursor, model: GenerativeModel) {
+export async function fillFields(page: Page, model: GenerativeModel) {
 
   await sleep(1000)
   try {

@@ -8,12 +8,13 @@ import { wait } from "./apply-linkedin/scripts/generate-links";
 import { Request, Response } from "express";
 import { applyScriptIndeed } from "./apply-indeed/apply-script-indeed";
 import { navigateToNextPage } from "./apply-linkedin/scripts/generate-pagination-links";
-import { connect, PageWithCursor } from "puppeteer-real-browser";
+import { connect } from "puppeteer-real-browser";
 import path from "path";
 import fs from "fs";
 import { createGlobalPrompt } from "./prompt";
 import multer from "multer";
 import { FormInputs } from "../routes/profile";
+import { Page } from "puppeteer";
 
 config();
 
@@ -44,7 +45,7 @@ export const sleep = (baseMs: number) => {
 };
 
 async function scrollToBottomAndBackSmoothly(
-  page: PageWithCursor,
+  page: Page,
   containerSelector: string
 ) {
   const scrollStep = 100; // Quantidade de pixels para rolar a cada passo
@@ -111,7 +112,7 @@ export function callServer() {
   const app = express();
   const port = 3000;
 
-  let pageInstance: PageWithCursor;
+  let pageInstance: Page;
 
   app.use(cors());
   app.use(json());
@@ -119,7 +120,7 @@ export function callServer() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  app.get("/", (req: Request, res: Response) => {
+  app.get("/", (_, res: Response) => {
     res.send("Servidor Express está funcionando!");
   });
 
@@ -134,10 +135,10 @@ export function callServer() {
 
   // Configuração do multer
   const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: function (_req, _file, cb) {
       cb(null, dirPath); // Salva os arquivos no diretório uploads na raiz do projeto
     },
-    filename: function (req, file, cb) {
+    filename: function (_req, file, cb) {
       cb(null, file.originalname); // Mantém o nome original do arquivo
     },
   });
@@ -171,8 +172,6 @@ export function callServer() {
       name,
       role,
       summary,
-      clEnglish,
-      clPortuguese,
       portfolio,
     } = data;
     try {
@@ -200,7 +199,7 @@ export function callServer() {
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
 
-      const { browser, page } = await connect({
+      const { page } = await connect({
         headless: false,
 
         args: [],
@@ -216,7 +215,7 @@ export function callServer() {
         disableXvfb: false,
         ignoreAllFlags: false,
       });
-
+//@ts-ignore
       pageInstance = page;
 
       await pageInstance.goto("https://www.google.com/", {
@@ -246,7 +245,7 @@ export function callServer() {
   });
 
   //linkedin
-  app.post("/apply-linkedin", async (req: Request, res: Response) => {
+  app.post("/apply-linkedin", async (_req: Request, res: Response) => {
     const maxIterations = (global as any).globalVars.maxApplications; // Acessando a variável global //decided for us, number around 150 iterations for paid
     console.log("browserInstance", pageInstance);
 
@@ -281,7 +280,7 @@ export function callServer() {
   });
 
   //indeed
-  app.post("/apply-indeed", async (req: Request, res: Response) => {
+  app.post("/apply-indeed", async (_req: Request, res: Response) => {
     const maxIterations = (global as any).globalVars.maxApplications; //decided for us, number around 150 iterations for paid
     //to-do: ele ta carregando a mesma pagina sem aplicar td hr num loop
     console.log("browserInstance", pageInstance);

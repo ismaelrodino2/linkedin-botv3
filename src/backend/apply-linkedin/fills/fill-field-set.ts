@@ -1,14 +1,12 @@
-import { Page } from "puppeteer";
 import { GenerativeModel } from "@google/generative-ai";
-import { sleep } from "../../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 import { wait } from "../scripts/generate-links";
 
 export function trimDots(text: string) {
   return text.replace(/^\.+|\.+$/g, "").trim();
 }
 
-export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel) {
+export async function fillFieldSet(page: Page, model: GenerativeModel) {
   const fieldsets = await page.$$(".jobs-easy-apply-content form fieldset");
 
   console.log("fieldsets", fieldsets);

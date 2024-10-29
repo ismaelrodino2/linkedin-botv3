@@ -1,12 +1,11 @@
-import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
 import { valuesConfig } from "../config";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { trimDots } from "./fill-field-set";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillInputs(page: PageWithCursor, model: GenerativeModel) {
+export async function fillInputs(page: Page, model: GenerativeModel) {
   const textInputs = await page.$$('main form input[type="text"]');
 
   console.log("textInputs1234", textInputs);

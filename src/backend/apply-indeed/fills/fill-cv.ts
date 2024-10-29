@@ -1,6 +1,6 @@
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillCv(page: PageWithCursor): Promise<void> {
+export async function fillCv(page: Page): Promise<void> {
   const docDivs = await page.$$("main fieldset > div");
 
   for (const docDiv of docDivs) {

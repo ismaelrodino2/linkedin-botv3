@@ -1,11 +1,9 @@
-import { Page } from "puppeteer";
-
 import { fillFields } from "../fill-fields";
 import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
 import { wait } from "../generate-links";
 import { JobInfo, sleep } from "../../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 import { setPromptLanguage } from "../../prompt";
 import LanguageDetect from "languagedetect";
 
@@ -25,7 +23,7 @@ export interface ApplicationFormData {
 }
 
 interface Params {
-  page: PageWithCursor;
+  page: Page;
   link: string;
   model: GenerativeModel;
   addJobToArrayIndeed: (el: JobInfo) => void;
@@ -135,7 +133,7 @@ export async function applyJobs({
   }
 }
 
-async function checkandSubmit(page: PageWithCursor, text: string) {
+async function checkandSubmit(page: Page, text: string) {
   try {
     const buttons = await page.$$("main .ia-BasePage-footer button");
 
@@ -168,61 +166,61 @@ async function checkandSubmit(page: PageWithCursor, text: string) {
   }
 }
 
-async function getJobInfo(page: PageWithCursor) {
-  const asideElements = await page.$$(
-    'aside[aria-labelledby="ia-JobInfoCard-header-title"] span'
-  ); //erro: retornando [] vazio
-  console.log("encontrou o botao1", asideElements);
+// async function getJobInfo(page: Page) {
+//   const asideElements = await page.$$(
+//     'aside[aria-labelledby="ia-JobInfoCard-header-title"] span'
+//   ); //erro: retornando [] vazio
+//   console.log("encontrou o botao1", asideElements);
 
-  const position = await page.evaluate(
-    (span) => span.innerText,
-    asideElements[0]
-  );
-  const companyAndLocation = await page.evaluate(
-    (span) => span.innerText,
-    asideElements[1]
-  );
+//   const position = await page.evaluate(
+//     (span) => span.innerText,
+//     asideElements[0]
+//   );
+//   const companyAndLocation = await page.evaluate(
+//     (span) => span.innerText,
+//     asideElements[1]
+//   );
 
-  const parts = companyAndLocation.split(" - ");
+//   const parts = companyAndLocation.split(" - ");
 
-  // Accessing the separated parts
-  const company = parts[0]; // "Grupo Mec"
-  const location = parts[1]; // "Rio de Janeiro, RJ"
+//   // Accessing the separated parts
+//   const company = parts[0]; // "Grupo Mec"
+//   const location = parts[1]; // "Rio de Janeiro, RJ"
 
-  const currentDateTime = new Date();
+//   const currentDateTime = new Date();
 
-  const buttonElement = await page.$(
-    'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
-  );
+//   const buttonElement = await page.$(
+//     'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
+//   );
 
-  console.log("encontrou o botao2", buttonElement);
+//   console.log("encontrou o botao2", buttonElement);
 
-  let language: string | null = null;
+//   let language: string | null = null;
 
-  if (buttonElement) {
-    const spanText = await page.evaluate(
-      (span) => span.innerText,
-      buttonElement
-    );
-    console.log("Span text:", spanText);
+//   if (buttonElement) {
+//     const spanText = await page.evaluate(
+//       (span) => span.innerText,
+//       buttonElement
+//     );
+//     console.log("Span text:", spanText);
 
-    const languageMap: { [key: string]: string } = {
-      Sair: "Portuguese",
-      Exit: "English",
-    };
+//     const languageMap: { [key: string]: string } = {
+//       Sair: "Portuguese",
+//       Exit: "English",
+//     };
 
-    // Use a type assertion to indicate spanText is one of the keys in the languageMap
-    language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
-  } else {
-    console.log("Button with specified data-testid not found");
-  }
+//     // Use a type assertion to indicate spanText is one of the keys in the languageMap
+//     language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
+//   } else {
+//     console.log("Button with specified data-testid not found");
+//   }
 
-  return {
-    position,
-    company,
-    location,
-    currentDateTime,
-    platform: "Indeed",
-    language,
-  };
-}
+//   return {
+//     position,
+//     company,
+//     location,
+//     currentDateTime,
+//     platform: "Indeed",
+//     language,
+//   };
+// }

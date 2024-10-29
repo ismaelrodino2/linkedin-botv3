@@ -1,8 +1,8 @@
-import { ElementHandle, Page } from "puppeteer";
+import { ElementHandle } from "puppeteer";
 import { selectors } from "../selectors";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillCv(page: PageWithCursor): Promise<void> {
+export async function fillCv(page: Page): Promise<void> {
   const docDivs = await page.$$(selectors.documentUpload);
 
   // Obtenha todos os elementos de rótulo ou span dentro do formulário

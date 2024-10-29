@@ -1,8 +1,7 @@
-import { Page } from "puppeteer";
 import { selectors } from "../selectors";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-async function clickNextButton(page: PageWithCursor): Promise<void> {
+async function clickNextButton(page: Page): Promise<void> {
   try {
     await page.waitForSelector(selectors.nextButton, {
       timeout: 3000,

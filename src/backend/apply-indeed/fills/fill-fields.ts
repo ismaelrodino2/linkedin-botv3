@@ -1,15 +1,14 @@
-import { Page } from "puppeteer";
 import { fillFieldSet } from "../fills/fill-field-set";
 import { GenerativeModel } from "@google/generative-ai";
 import { fillInputs } from "../fills/fill-inputs";
 import { fillSelects } from "../fills/fill-selects";
 import { fillTextAreas } from "../fills/fill-text-areas";
 import { fillCv } from "../fills/fill-cv";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 import { wait } from "../generate-links";
 
 // Função para simular movimentos aleatórios do mouse
-async function moveMouseRandomly(page: PageWithCursor) {
+async function moveMouseRandomly(page: Page) {
   const x = Math.floor(Math.random() * 1920); // Largura da tela (exemplo de largura comum)
   const y = Math.floor(Math.random() * 1080); // Altura da tela (exemplo de altura comum)
 

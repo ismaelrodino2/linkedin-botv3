@@ -2,9 +2,9 @@ import { knownFields } from "../known-fields";
 import { GenerativeModel } from "@google/generative-ai";
 import { trimDots } from "./fill-field-set";
 import { valuesConfig } from "../config";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillInputs(page: PageWithCursor, model: GenerativeModel) {
+export async function fillInputs(page: Page, model: GenerativeModel) {
   const textInputs = await page.$$(
     '.jobs-easy-apply-content form input[type="text"]'
   );

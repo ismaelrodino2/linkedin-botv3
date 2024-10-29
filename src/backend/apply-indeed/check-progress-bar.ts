@@ -1,7 +1,6 @@
 import { Page } from "puppeteer";
-import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function checkProgressBar(page: PageWithCursor) {
+export async function checkProgressBar(page: Page) {
     const progressBar = await page.$("div[role='progressbar']");
 
     if (progressBar) {

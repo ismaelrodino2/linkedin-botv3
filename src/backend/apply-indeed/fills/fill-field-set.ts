@@ -1,12 +1,12 @@
-import { ElementHandle, Page } from "puppeteer";
+import { ElementHandle } from "puppeteer";
 import { GenerativeModel } from "@google/generative-ai";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
 export function trimDots(text: string) {
   return text.replace(/^\.+|\.+$/g, "").trim();
 }
 
-export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel) {
+export async function fillFieldSet(page: Page, model: GenerativeModel) {
   const fieldsets = await page.$$("main fieldset");
 
   console.log("fieldsets", fieldsets);
@@ -69,7 +69,6 @@ export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel)
         console.log("texto do fieldset:", text); // Exibe o texto no console
 
         const input = await option.$("input");
-
         labelsTexts.push({
           legendText,
           option,

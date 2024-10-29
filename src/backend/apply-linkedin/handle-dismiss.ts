@@ -1,7 +1,6 @@
 import { Page } from "puppeteer";
-import { PageWithCursor } from "puppeteer-real-browser";
 
-export async function handleDismiss(page: PageWithCursor) {
+export async function handleDismiss(page: Page) {
   try {
     // Espera até que o botão "Dismiss" esteja visível e clica nele
     const dismissButton = await page.waitForSelector('button[aria-label="Dismiss"]', { visible: true });

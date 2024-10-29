@@ -1,13 +1,13 @@
 import { ElementHandle } from "puppeteer";
 import { knownFields } from "./known-fields";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
 export const wait = (time: number) =>
   new Promise((resolve) => setTimeout(resolve, time));
 
 // Função para rolar suavemente até o final de um contêiner
 
-export async function generateLinks(page: PageWithCursor) {
+export async function generateLinks(page: Page) {
   // Seleciona todos os <li> dentro de um ul com a classe 'scaffold-layout__list-container'
   const allLis = await page.$$("#mosaic-provider-jobcards > ul > li");
 

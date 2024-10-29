@@ -1,7 +1,7 @@
 import { Page } from "puppeteer";
 
 // Função para gerar a próxima URL de paginação e navegar para ela no Indeed
-export async function navigateToNextPageIndeed(page: PageWithCursor): Promise<void> {
+export async function navigateToNextPageIndeed(page: Page): Promise<void> {
   // Pega a URL atual do navegador
   const currentUrl = await page.evaluate(() => window.location.href);
 

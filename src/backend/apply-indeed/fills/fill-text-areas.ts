@@ -1,11 +1,10 @@
-import { Page } from "puppeteer";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { knownFields } from "../known-fields";
 import { valuesConfig } from "../config";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-export async function fillTextAreas(page: PageWithCursor,  model: GenerativeModel) {
+export async function fillTextAreas(page: Page,  model: GenerativeModel) {
   const textAreas = await page.$$("main textarea");
 
   console.log("textAreas123", textAreas)

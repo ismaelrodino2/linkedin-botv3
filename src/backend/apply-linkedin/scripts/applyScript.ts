@@ -1,11 +1,10 @@
 import { GenerativeModel } from "@google/generative-ai";
-import { Page } from "puppeteer";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
 import { JobInfo } from "../../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
-async function clickDismissButton(page: PageWithCursor) {
+async function clickDismissButton(page: Page) {
   try {
     // Seleciona o botão e clica nele
     await page.click('button[aria-label="Dismiss"]');
@@ -15,7 +14,7 @@ async function clickDismissButton(page: PageWithCursor) {
   }
 }
 
-export async function applyScript(page: PageWithCursor, model: GenerativeModel, addJobToArrayLinkedin: (jobs: JobInfo)=>void, appliedJobsLinkedin: JobInfo[], maxIterations: number) {
+export async function applyScript(page: Page, model: GenerativeModel, addJobToArrayLinkedin: (jobs: JobInfo)=>void, appliedJobsLinkedin: JobInfo[], maxIterations: number) {
   const validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);

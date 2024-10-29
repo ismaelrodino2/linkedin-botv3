@@ -5,12 +5,12 @@ import { JobInfo, sleep } from "../../../callserver";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 import LanguageDetect from "languagedetect";
 
 const noop = () => {};
 
-async function clickApplyButton(page: PageWithCursor): Promise<void> {
+async function clickApplyButton(page: Page): Promise<void> {
   try {
     const buttonText = await page.evaluate((applyButtonSelector) => {
       const button = document.querySelector(applyButtonSelector);
@@ -43,7 +43,7 @@ export interface ApplicationFormData {
 }
 
 interface Params {
-  page: PageWithCursor;
+  page: Page;
   link: string;
   model: GenerativeModel;
   addJobToArrayLinkedin: (el: JobInfo) => void;
@@ -134,7 +134,7 @@ export async function applyJobs({
   }
 }
 
-async function getJobInfo(page: PageWithCursor, language: string) {
+async function getJobInfo(page: Page, language: string) {
   const asideElements = await page.$(
     "job-details-jobs-unified-top-card__job-title h1"
   );

@@ -1,9 +1,8 @@
-import { Page } from "puppeteer";
 import { sleep } from "../../callserver";
-import { PageWithCursor } from "puppeteer-real-browser";
+import { Page } from "puppeteer";
 
 // Função principal para clicar nos botões e verificar progresso
-export async function clickNext(page: PageWithCursor) {
+export async function clickNext(page: Page) {
   try {
     await sleep(400); // Aumente o tempo se necessário
 
