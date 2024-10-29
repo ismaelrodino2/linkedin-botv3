@@ -1,7 +1,5 @@
-import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
 import { GenerativeModel } from "@google/generative-ai";
-import { sleep } from "../../callserver";
 import { trimDots } from "./fill-field-set";
 import { PageWithCursor } from "puppeteer-real-browser";
 
@@ -57,7 +55,6 @@ export async function fillSelects(page: PageWithCursor, model: GenerativeModel) 
         ) {
           // Se encontrar, seleciona a opção correspondente pelo value
           await select.select(matchedOption.value);
-          await sleep(300);
 
           console.log(`Selecionado: ${matchedOption.text}`);
         } else {
@@ -87,7 +84,6 @@ export async function fillSelects(page: PageWithCursor, model: GenerativeModel) 
 
           if (aiOptionIndex >= 0 && aiOptionIndex < options.length - 1) {
             // Verifique se está dentro do intervalo ajustado
-            await sleep(300);
 
             await select.select(options[aiOptionIndex + 1].value); // Usamos o `value` da opção ajustando o índice
             console.log(

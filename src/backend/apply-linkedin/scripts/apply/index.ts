@@ -1,5 +1,3 @@
-import { Page } from "puppeteer";
-
 import { fillFields } from "../fill-fields";
 import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
@@ -83,13 +81,6 @@ export async function applyJobs({
 
   const fields = await getJobInfo(page, language);
 
-  //erro to-do:   position: undefined,
-  // company: undefined,
-  // location: undefined,
-  // currentDateTime: 2024-10-26T22:28:46.553Z,
-  // platform: 'Linkedin',
-  // language: 'en'
-
   console.log("todos valores de linkedin", fields);
 
   // Verificar a barra de progresso inicial
@@ -105,7 +96,7 @@ export async function applyJobs({
     let maxPages = 7;
     // let maxTries = 2;
     while (maxPages--) {
-      await sleep(350);
+      await wait(200);
       await fillFields(page, model).catch(noop);
 
       // Verificar a barra de progresso após clicar no botão "Next"

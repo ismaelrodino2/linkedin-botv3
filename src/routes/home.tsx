@@ -2,8 +2,6 @@ import "../App.css";
 
 function Home() {
   async function handleLogin(link:string) {
-    const savedData = localStorage.getItem("userProfile");
-    const defaultValues = savedData ? {...JSON.parse(savedData), startDate: new Date()} : {};
 
     const url = "http://localhost:3000/navigate";
 
@@ -13,7 +11,6 @@ function Home() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        data:defaultValues,
         url: link
       }), 
 

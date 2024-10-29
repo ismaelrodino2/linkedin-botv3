@@ -34,9 +34,9 @@ export async function applyScript(page: PageWithCursor, model: GenerativeModel, 
     await wait(350);
     if (link) {
       await applyJobs({ link, model, page, addJobToArrayLinkedin });
-      await wait(200);
+      await wait(100);
       await clickDismissButton(page);
-      await wait(350);
+      await wait(100);
     }
   }
 }

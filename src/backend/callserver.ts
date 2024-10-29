@@ -156,7 +156,47 @@ export function callServer() {
   });
 
   app.post("/open", async (req: Request, res: Response) => {
+    const data: FormInputs = req.body.data;
+    const {
+      address,
+      availability,
+      cvNameIndeed,
+      desiredSalary,
+      email,
+      experiences,
+      languages,
+      linkedin,
+      location,
+      maxApplications,
+      name,
+      role,
+      summary,
+      clEnglish,
+      clPortuguese,
+      portfolio,
+    } = data;
     try {
+      createGlobalPrompt({
+        address,
+        availability,
+        desiredSalary,
+        email,
+        experiences,
+        languages,
+        linkedin,
+        location,
+        name,
+        portfolio,
+        role,
+        startDate: new Date(),
+        summary,
+      });
+
+      (global as any).globalVars = {
+        cvNameIndeed,
+        maxApplications,
+      }; // Armazenando o valor globalmente
+
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
 
@@ -191,52 +231,9 @@ export function callServer() {
   });
 
   app.post("/navigate", async (req: Request, res: Response) => {
-    const data: FormInputs = req.body.data;
     const url: string = req.body.url;
-    const {
-      address,
-      availability,
-      cvNameIndeed,
-      desiredSalary,
-      email,
-      experiences,
-      languages,
-      linkedin,
-      location,
-      maxApplications,
-      name,
-      role,
-      summary,
-      clEnglish,
-      clPortuguese,
-      portfolio,
-    } = data;
 
     try {
-      createGlobalPrompt({
-        address,
-        availability,
-        desiredSalary,
-        email,
-        experiences,
-        languages,
-        linkedin,
-        location,
-        name,
-        portfolio,
-        role,
-        startDate: new Date(),
-        summary,
-      });
-
-      (global as any).globalVars = {
-        cvNameIndeed,
-        maxApplications,
-      }; // Armazenando o valor globalmente
-
-      // Agora a variável globalPrompt está disponível globalmente
-      console.log("global.globalPrompt", global.globalPrompt);
-
       await pageInstance.goto(url, {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });

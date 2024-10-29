@@ -55,12 +55,4 @@ export async function fillFields(page: PageWithCursor, model: GenerativeModel) {
   } catch (error) {
     console.error("Erro ao preencher CV:", error);
   }
-
-  // Se precisar chamar fillFieldSet novamente
-  // try {
-  //   await fillFieldSet(page, model);
-  //   await moveMouseRandomly(page); // Movimento aleatório do mouse
-  // } catch (error) {
-  //   console.error("Erro ao preencher fieldset (segunda vez):", error);
-  // }
 }

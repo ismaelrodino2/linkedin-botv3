@@ -2,6 +2,7 @@ import { Page } from "puppeteer";
 import { GenerativeModel } from "@google/generative-ai";
 import { sleep } from "../../callserver";
 import { PageWithCursor } from "puppeteer-real-browser";
+import { wait } from "../scripts/generate-links";
 
 export function trimDots(text: string) {
   return text.replace(/^\.+|\.+$/g, "").trim();
@@ -126,10 +127,8 @@ export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel)
             );
             // Se for multipleChoice, iterar sobre todos os preferredLabels encontrados e clicar em cada um
             for (const preferredLabel of preferredLabels) {
-              await sleep(600);
               await preferredLabel?.input.click();
               await preferredLabel?.labelElement.click();
-              await sleep(600);
               console.log(
                 `Input com a label "${preferredLabel.labelText}" foi clicado.`
               );
@@ -143,11 +142,9 @@ export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel)
             );
             console.log("preferredLabel", preferredLabel);
 
-            await sleep(300);
 
             await preferredLabel?.input.click();
             await preferredLabel?.labelElement.click();
-            await sleep(300);
 
             // if (preferredLabel) {
             //   const inputHandle = preferredLabel.input;
@@ -174,7 +171,7 @@ export async function fillFieldSet(page: PageWithCursor, model: GenerativeModel)
             // } else {
             //   console.log("Nenhum input encontrado com a label específica");
             // }
-            await sleep(300);
+            await wait(100);
           }
         }
       }

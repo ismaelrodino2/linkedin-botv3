@@ -1,7 +1,5 @@
-import { Page } from "puppeteer";
 import { knownFields } from "../known-fields";
 import { GenerativeModel } from "@google/generative-ai";
-import { sleep } from "../../callserver";
 import { trimDots } from "./fill-field-set";
 import { valuesConfig } from "../config";
 import { PageWithCursor } from "puppeteer-real-browser";
@@ -46,7 +44,6 @@ export async function fillInputs(page: PageWithCursor, model: GenerativeModel) {
           // Verificar se a classe contém alguma das strings de knownFields dinamicamente
           //@ts-ignore
           const fieldValue = valuesConfig[foundFieldKey];
-          await sleep(300);
 
           await textInput.type(fieldValue);
         } else {
@@ -94,7 +91,6 @@ export async function fillInputs(page: PageWithCursor, model: GenerativeModel) {
           }
 
           if (textResponse.trim()) {
-            await sleep(300);
 
             await textInput.type(trimDots(textResponse));
           } else {

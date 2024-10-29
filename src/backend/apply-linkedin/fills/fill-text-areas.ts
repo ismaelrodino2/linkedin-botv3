@@ -48,7 +48,6 @@ export async function fillTextAreas(page: PageWithCursor, model: GenerativeModel
           // Verificar se a classe contém alguma das strings de knownFields dinamicamente
           //@ts-ignore
           const fieldValue = valuesConfig[foundFieldKey];
-          await sleep(300);
 
           await textTextArea.type(fieldValue);
         } else {
@@ -60,7 +59,6 @@ export async function fillTextAreas(page: PageWithCursor, model: GenerativeModel
           const result = await model.generateContent(prompt);
 
           const textResponse = result.response.text();
-          await sleep(300);
 
           await textTextArea.type(textResponse.trim());
         }
