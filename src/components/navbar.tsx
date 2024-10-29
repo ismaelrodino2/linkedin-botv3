@@ -1,22 +1,118 @@
 import { MenuIcon } from "lucide-react";
-import "./navbar.css"
+import React from "react";
+import {
+  Sidebar,
+  Menu,
+  MenuItem,
+  SubMenu,
+  menuClasses,
+  MenuItemStyles,
+} from "react-pro-sidebar";
+import { Link } from "react-router-dom";
 
-export function NavBar() {
+type Theme = "light" | "dark";
+
+const themes = {
+  light: {
+    sidebar: {
+      backgroundColor: "#ffffff",
+      color: "#607489",
+    },
+    menu: {
+      menuContent: "#fbfcfd",
+      icon: "#0098e5",
+      hover: {
+        backgroundColor: "#c5e4ff",
+        color: "#44596e",
+      },
+      disabled: {
+        color: "#9fb6cf",
+      },
+    },
+  },
+  dark: {
+    sidebar: {
+      backgroundColor: "#0b2948",
+      color: "#8ba1b7",
+    },
+    menu: {
+      menuContent: "#082440",
+      icon: "#59d0ff",
+      hover: {
+        backgroundColor: "#00458b",
+        color: "#b6c8d9",
+      },
+      disabled: {
+        color: "#3e5e7e",
+      },
+    },
+  },
+};
+
+// hex to rgba converter
+const hexToRgba = (hex: string, alpha: number) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+export const NavBar = ({ children }: { children: React.ReactNode }) => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const [toggled, setToggled] = React.useState(false);
+
+
+  const menuItemStyles: MenuItemStyles = {
+    root: {
+      fontSize: "13px",
+      fontWeight: 400,
+    },
+    SubMenuExpandIcon: {
+      color: "#b6b7b9",
+    },
+    label: ({ open }) => ({
+      fontWeight: open ? 600 : undefined,
+    }),
+  };
+
   return (
-    <div className="container">
-    <nav className="navbar">
-      <MenuIcon size={48} />
-      <div className="menu-content">
-        <div className="image-wrapper">
-          <img
-            src="https://s3-alpha-sig.figma.com/img/2d2e/5d0a/6be4e27f17c41b46c8b0f59ac925e757?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YYrrVEew8QW1iFQT1~R9EEh30DpKLq3C2tDrtvft9dc~PntQ-y6SHAKqghED6yje4Yrr4IWXq1N3OTJiPvaygSvw~qa9eBz~FC6VUyZKeOuF19k1T7mUP0iKJkc2gySk7r3zh9Q-nKS42aSIXZYUWo2iKTv9Ff5OOAtHW-G8kRP2Vnpf6qzuJL9j6KJO15gtZgE1bAVSWO4n2zSm5D0Vam5ahFI-iIJs8oLHOJ~-4Va15JrxAwxjZ3Uel7gflELEyR~b0DDfN~pCEABN7ZEd4dvO~XDpIQ2TUvSG8~usN0JASn6w9bveC~fcssCM9JeNcn0s4ye3l3ZEonVzrseU3w__"
-            alt=""
-            className="profile-image"
-          />
-        </div>
-      </div>
-    </nav>
-  </div>
+    <div
+      style={{
+        display: "flex",
+        height: "100%",
+      }}
+    >
+      <Sidebar
+        collapsed={collapsed}
+        toggled={toggled}
+        onBackdropClick={() => setToggled(false)}
+        breakPoint="md"
+      >
+        <div
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          <div style={{ flex: 1, marginBottom: "32px" }}>
+            <button
+              style={{ padding: "0 24px", marginBottom: "8px" }}
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <MenuIcon size={48} />
+            </button>
+            <Menu menuItemStyles={menuItemStyles}>
+                <MenuItem>
+                  <Link to="/profile">Profile</Link>
+                </MenuItem>
+                <MenuItem>
+                  <Link to="/">Home</Link>
+                </MenuItem>
+            </Menu>
   
+          </div>
+        </div>
+      </Sidebar>
+
+      <main>{children}</main>
+    </div>
   );
-}
+};

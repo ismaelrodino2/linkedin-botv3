@@ -12,6 +12,8 @@ import { connect, PageWithCursor } from "puppeteer-real-browser";
 import path from "path";
 import fs from "fs";
 import { createGlobalPrompt } from "./prompt";
+import multer from "multer";
+import { FormInputs } from "../routes/profile";
 
 config();
 
@@ -121,25 +123,40 @@ export function callServer() {
     res.send("Servidor Express está funcionando!");
   });
 
-  app.post("/navigate", async (req: Request, res: Response) => {
+  // Definindo o diretório base como a raiz do projeto
+  const baseDirectory = path.join(__dirname, "../../"); // Ajuste conforme necessário
+  const dirPath = path.join(baseDirectory, "uploads");
+
+  // Cria o diretório "uploads" se não existir
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  // Configuração do multer
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, dirPath); // Salva os arquivos no diretório uploads na raiz do projeto
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname); // Mantém o nome original do arquivo
+    },
+  });
+
+  const upload = multer({ storage });
+
+  // Endpoint para upload de arquivos
+  app.post("/upload", upload.single("file"), (req, res) => {
+    if (req.file) {
+      console.log("Arquivo recebido:", req.file.originalname);
+      res.json({ message: "File uploaded successfully" });
+    } else {
+      console.error("Nenhum arquivo foi recebido");
+      res.status(400).json({ message: "No file uploaded" });
+    }
+  });
+
+  app.post("/open", async (req: Request, res: Response) => {
     try {
-      createGlobalPrompt({
-        name: "Gabriel Cunha",
-        role: "UI/UX & Mobile Designer",
-        location: "Rio de Janeiro, Brazil",
-        email: "designbycunha@gmail.com",
-        linkedin: "www.linkedin.com/in/cunha2c",
-        portfolio: "www.behance.net/gabrielcunha5",
-        summary:
-          "Dedicated UI/UX designer with a passion for learning and overcoming challenges. Experienced with Figma, and committed to working in leading teams.",
-        experiences:
-          "UI Designer, i2 Capital (May–Aug 2024): Led design projects, UX research, prototypes. | Social Media Manager, Torie Propaganda (Jan 2024–Present): Managed content creation and social media strategy. | UI/UX Designer, Curiba (Jan 2023–Mar 2024): Specialized in design systems, color theory, typography. | Freelance (Nov 2023–Jan 2024): E-commerce project development. | Social Media Manager, beofficesbrasil (May–Dec 2021): Digital marketing and social media strategies.",
-        languages: "English, Spanish, Portuguese",
-        availability: "Immediately",
-        desiredSalary: "40,000 USD",
-        startDate: new Date(),
-        address: "Rua Álvaro Proença, Parque São Nicolau",
-      });
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
 
@@ -158,17 +175,69 @@ export function callServer() {
 
         disableXvfb: false,
         ignoreAllFlags: false,
-        // proxy:{
-        //     host:'<proxy-host>',
-        //     port:'<proxy-port>',
-        //     username:'<proxy-username>',
-        //     password:'<proxy-password>'
-        // }
       });
 
       pageInstance = page;
 
-      await pageInstance.goto("https://www.linkedin.com/", {
+      await pageInstance.goto("https://www.google.com/", {
+        waitUntil: ["domcontentloaded", "networkidle2"],
+      });
+
+      res.send("Puppeteer test completed successfully.");
+    } catch (error) {
+      console.error("An error occurred during the Puppeteer test:", error);
+      res.status(500).send("An error occurred during the Puppeteer test.");
+    }
+  });
+
+  app.post("/navigate", async (req: Request, res: Response) => {
+    const data: FormInputs = req.body.data;
+    const url: string = req.body.url;
+    const {
+      address,
+      availability,
+      cvNameIndeed,
+      desiredSalary,
+      email,
+      experiences,
+      languages,
+      linkedin,
+      location,
+      maxApplications,
+      name,
+      role,
+      summary,
+      clEnglish,
+      clPortuguese,
+      portfolio,
+    } = data;
+
+    try {
+      createGlobalPrompt({
+        address,
+        availability,
+        desiredSalary,
+        email,
+        experiences,
+        languages,
+        linkedin,
+        location,
+        name,
+        portfolio,
+        role,
+        startDate: new Date(),
+        summary,
+      });
+
+      (global as any).globalVars = {
+        cvNameIndeed,
+        maxApplications,
+      }; // Armazenando o valor globalmente
+
+      // Agora a variável globalPrompt está disponível globalmente
+      console.log("global.globalPrompt", global.globalPrompt);
+
+      await pageInstance.goto(url, {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });
 
@@ -181,8 +250,7 @@ export function callServer() {
 
   //linkedin
   app.post("/apply-linkedin", async (req: Request, res: Response) => {
-    const maxIterations = 2; //decided for us, number around 150 iterations for paid
-
+    const maxIterations = (global as any).globalVars.maxApplications; // Acessando a variável global //decided for us, number around 150 iterations for paid
     console.log("browserInstance", pageInstance);
 
     function addJobToArrayLinkedin(el: JobInfo) {
@@ -213,23 +281,24 @@ export function callServer() {
     console.log("jobs aplicados:", appliedJobsLinkedin);
 
     res.send("Puppeteer test completed successfully.");
-
   });
 
   //indeed
   app.post("/apply-indeed", async (req: Request, res: Response) => {
-    const maxIterations = 2; //decided for us, number around 150 iterations for paid
+    const maxIterations = (global as any).globalVars.maxApplications; //decided for us, number around 150 iterations for paid
     //to-do: ele ta carregando a mesma pagina sem aplicar td hr num loop
     console.log("browserInstance", pageInstance);
 
     function addJobToArrayIndeed(el: JobInfo) {
       appliedJobsIndeed.push(el);
-      console.log("appliedJobsIndeed", appliedJobsIndeed)
+      console.log("appliedJobsIndeed", appliedJobsIndeed);
     }
 
-    const somePopUpThatCanDisplay = await pageInstance.$("#mosaic-desktopserpjapopup button[aria-label='fechar']")
+    const somePopUpThatCanDisplay = await pageInstance.$(
+      "#mosaic-desktopserpjapopup button[aria-label='fechar']"
+    );
 
-    await somePopUpThatCanDisplay?.click()
+    await somePopUpThatCanDisplay?.click();
 
     while (appliedJobsIndeed.length < maxIterations) {
       try {
@@ -251,7 +320,6 @@ export function callServer() {
     }
     console.log("jobs aplicados:", appliedJobsIndeed);
     res.send("Puppeteer test completed successfully.");
-
   });
 
   const server = app.listen(port, () => {

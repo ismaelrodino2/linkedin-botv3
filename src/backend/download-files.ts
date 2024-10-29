@@ -7,9 +7,9 @@ import { v2 as cloudinary } from "cloudinary";
 
 // Configuration
 cloudinary.config({
-  cloud_name: "easyapplybot",
-  api_key: "849592999416183",
-  api_secret: "HK7FBjpdZ7IuLrs6Z3aryxDoA6U",
+  cloud_name: import.meta.env.VITE_API_NAME_CLOUDINARY,
+  api_key: import.meta.env.VITE_API_KEY_CLOUDINARY,
+  api_secret: import.meta.env.VITE_API_SECRET_CLOUDINARY,
 });
 
 const requiredFiles = [
@@ -20,7 +20,7 @@ const requiredFiles = [
 ];
 
 export async function downloadFilesIfDoesntExist() {
-  const baseDirectory = join(__dirname, ".."); // Usa ".." para referenciar o diretório do projeto
+  const baseDirectory = join(__dirname, "..");
   const dirPath: string = join(baseDirectory, "uploads");
 
   // Cria o diretório "uploads" se não existir

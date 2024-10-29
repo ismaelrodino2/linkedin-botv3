@@ -28,6 +28,7 @@ export async function applyScript(page: PageWithCursor, model: GenerativeModel, 
   for (const link of validLinks) {
     if (appliedJobsLinkedin.length >= maxIterations) {
       // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
+      page.close()
       break;
     }
     await wait(350);
