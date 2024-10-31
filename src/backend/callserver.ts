@@ -108,6 +108,9 @@ async function scrollToBottomAndBackSmoothly(
 export function callServer() {
   const appliedJobsIndeed: JobInfo[] = []; //will come from api
   const appliedJobsLinkedin: JobInfo[] = []; //will come from api
+// Variáveis globais para armazenar genAI e o modelo
+let genAI: GoogleGenerativeAI | null = null;
+let model: any = null;
 
   const app = express();
   const port = 3000;
@@ -117,8 +120,7 @@ export function callServer() {
   app.use(cors());
   app.use(json());
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
   app.get("/", (_, res: Response) => {
     res.send("Servidor Express está funcionando!");
@@ -195,6 +197,10 @@ export function callServer() {
         cvNameIndeed,
         maxApplications,
       }; // Armazenando o valor globalmente
+
+       genAI = new GoogleGenerativeAI("AIzaSyBO_Xs_g7230U0FEZw0VNapadJzUIgUvC0");
+       model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
