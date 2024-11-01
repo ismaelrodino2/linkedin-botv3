@@ -11,7 +11,7 @@ export async function applyScriptIndeed(
   appliedJobsIndeed: JobInfo[],
   maxIterations: number
 ) {
-  const validLinks = await generateLinks(page);
+  let validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);
 
@@ -20,7 +20,7 @@ export async function applyScriptIndeed(
 
     if (appliedJobsIndeed.length >= maxIterations) {
       // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
-      page.close();
+      validLinks=[]
       break;
     }
 

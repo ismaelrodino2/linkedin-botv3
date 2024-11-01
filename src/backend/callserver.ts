@@ -283,6 +283,7 @@ let model: any = null;
     console.log("jobs aplicados:", appliedJobsLinkedin);
 
     res.send("Puppeteer test completed successfully.");
+    await pageInstance.close()
   });
 
   //indeed
@@ -322,6 +323,7 @@ let model: any = null;
     }
     console.log("jobs aplicados:", appliedJobsIndeed);
     res.send("Puppeteer test completed successfully.");
+    await pageInstance.close()
   });
 
   const server = app.listen(port, () => {

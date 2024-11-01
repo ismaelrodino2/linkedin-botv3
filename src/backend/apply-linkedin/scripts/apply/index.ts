@@ -64,10 +64,16 @@ export async function applyJobs({
   // OR
   // const lngDetector = new (require('languagedetect'));
 
-  const jobDescriptionText = await page.$$eval(
-    ".jobs-box__html-content .text-heading-large .mt4 > p[dir='ltr'] span",
-    (spans) => spans.map((span) => span.textContent?.trim()).join(" ")
+  const jobDescriptionElements = await page.$$(
+    ".jobs-box__html-content .mt4 > p[dir='ltr'] span"
   );
+  const jobDescriptionText = await Promise.all(
+    jobDescriptionElements.map((element) =>
+      element.evaluate((el) => el.innerText)
+    )
+  ).then((textArray) => textArray.join(" "));
+
+  console.log("jobDescriptionElements", jobDescriptionElements);
   let language: string = "en"; // Default to 'en' or another default language of your choice
 
   console.log("todas strings linkedin lang", jobDescriptionText);
@@ -97,7 +103,7 @@ export async function applyJobs({
     // let maxTries = 2;
     while (maxPages--) {
       await wait(200);
-      await fillFields(page, model).catch(noop);
+      await fillFields(page, model, language).catch(noop);
 
       // Verificar a barra de progresso após clicar no botão "Next"
       bar2 = await checkProgressBar(page);
@@ -114,7 +120,7 @@ export async function applyJobs({
           ".jobs-easy-apply-content button[aria-label='Enviar candidatura']"
         );
         if (!isSubmitButtonEn || !isSubmitButtonPt) {
-          console.log("teste aqui 123321")
+          console.log("teste aqui 123321");
           break; // Se o valor não mudou, sai do loop
         }
       }
@@ -126,8 +132,8 @@ export async function applyJobs({
       language: language,
       location: "test",
       platform: "test",
-      position: "test"
-    })
+      position: "test",
+    });
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
@@ -135,31 +141,26 @@ export async function applyJobs({
 }
 
 async function getJobInfo(page: Page, language: string) {
-  const asideElements = await page.$(
-    "job-details-jobs-unified-top-card__job-title h1"
-  );
+// Espera o primeiro elemento estar visível
+const h1 = await page.waitForSelector(".t-24.t-bold.inline > a", { visible: true, timeout: 5000 });
 
-  const companyNameElement = await page.$(
-    "job-details-jobs-unified-top-card__company-name > a"
-  );
+const companyNameElement = await page.waitForSelector(
+  ".job-details-jobs-unified-top-card__company-name > a", 
+  { visible: true, timeout: 5000 }
+);
 
-  const firstSpanElement = await page.$(
-    "job-details-jobs-unified-top-card__primary-description-container > div span:first-child"
-  );
+const firstSpanElement = await page.waitForSelector(
+  ".job-details-jobs-unified-top-card__primary-description-container > div span:first-child", 
+  { visible: true, timeout: 5000 }
+);
 
-  const position = await page.evaluate(
-    (span) => span?.innerText,
-    asideElements
-  );
+  console.log("qqqqqqqqq", h1,companyNameElement, firstSpanElement)
 
-  const company = await page.evaluate(
-    (element) => element?.innerText,
-    companyNameElement
-  );
-  const location = await page.evaluate(
-    (element) => element?.innerText,
-    firstSpanElement
-  );
+  const position = await h1?.evaluate((el) => el.innerText);
+
+  const company = await companyNameElement?.evaluate((el) => el.innerText);
+
+  const location = await firstSpanElement?.evaluate((el) => el.innerText); //foi
 
   const currentDateTime = new Date();
 

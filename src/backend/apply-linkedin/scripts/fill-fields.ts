@@ -19,7 +19,7 @@ async function moveMouseRandomly(page: Page) {
   await wait(Math.random() * 500 + 200); // Entre 200ms e 700ms
 }
 
-export async function fillFields(page: Page, model: GenerativeModel) {
+export async function fillFields(page: Page, model: GenerativeModel, language:string) {
   try {
     await fillFieldSet(page, model);
     await moveMouseRandomly(page); // Movimento aleatório do mouse
@@ -49,7 +49,7 @@ export async function fillFields(page: Page, model: GenerativeModel) {
   }
 
   try {
-    await fillCv(page);
+    await fillCv(page, language);
     await moveMouseRandomly(page); // Movimento aleatório do mouse
   } catch (error) {
     console.error("Erro ao preencher CV:", error);

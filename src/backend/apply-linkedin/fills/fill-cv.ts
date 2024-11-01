@@ -2,7 +2,7 @@ import { ElementHandle } from "puppeteer";
 import { selectors } from "../selectors";
 import { Page } from "puppeteer";
 
-export async function fillCv(page: Page): Promise<void> {
+export async function fillCv(page: Page, language:string): Promise<void> {
   const docDivs = await page.$$(selectors.documentUpload);
 
   // Obtenha todos os elementos de rótulo ou span dentro do formulário
@@ -34,8 +34,8 @@ export async function fillCv(page: Page): Promise<void> {
     ).toLocaleLowerCase();
     console.log("o text é...", text);
 
-    if (text.includes("resume")) {
-      if (foundTextCvPt) {
+    if (text.includes("resume")) { //to-do rro ao preencher CV: TypeError: Cannot read properties of null (reading 'uploadFile')
+      if (language==="portuguese") {
         // pt resume
         console.log("Uploading Portuguese resume: uploads/cv-pt.pdf");
         await input.uploadFile("uploads/cv-pt.pdf");
@@ -45,7 +45,7 @@ export async function fillCv(page: Page): Promise<void> {
         await input.uploadFile("uploads/cv-en.pdf");
       }
     } else if (text.includes("cover")) {
-      if (foundTextClPt) {
+      if (language==="portuguese") {
         // pt cover letter
         console.log("Uploading Portuguese cover letter: uploads/cl-pt.pdf");
         await input.uploadFile("uploads/cl-pt.pdf");
