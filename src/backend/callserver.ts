@@ -198,7 +198,7 @@ let model: any = null;
         maxApplications,
       }; // Armazenando o valor globalmente
 
-       genAI = new GoogleGenerativeAI("AIzaSyBO_Xs_g7230U0FEZw0VNapadJzUIgUvC0");
+       genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
        model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 
