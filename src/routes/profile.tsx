@@ -72,10 +72,10 @@ const Profile: React.FC = () => {
       await uploadFile(clEnglish, "cl-en");
       await uploadFile(clPortuguese, "cl-pt");
 
-      toast("Data and files saved!");
+      toast("Dados e arquivos salvos!");
     } catch (err) {
       console.error(err);
-      toast.error("Error saving data or files.");
+      toast.error("Erro ao salvar dados ou arquivos.");
     }
   };
 
@@ -83,45 +83,45 @@ const Profile: React.FC = () => {
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="maxApplications">Max applications number</label>
+          <label htmlFor="maxApplications">Número máximo de aplicações</label>
           <input
             id="maxApplications"
             {...register("maxApplications", {
-              required: "max aplications is required",
+              required: "O número máximo de aplicações é obrigatório",
             })}
             className="input"
             type="number"
           />
           {errors.name && <p>{errors.name.message}</p>}
-          <label htmlFor="cvNameIndeed">CV name in indeed</label>
+          <label htmlFor="cvNameIndeed">Nome do CV no Indeed</label>
           <input
             id="cvNameIndeed"
-            {...register("cvNameIndeed", { required: "CV name is required" })}
+            {...register("cvNameIndeed", { required: "O nome do CV é obrigatório" })}
             className="input"
           />
           {errors.name && <p>{errors.name.message}</p>}
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">Nome</label>
           <input
             id="name"
-            {...register("name", { required: "Name is required" })}
+            {...register("name", { required: "O nome é obrigatório" })}
             className="input"
           />
           {errors.name && <p>{errors.name.message}</p>}
         </div>
         <div>
-          <label htmlFor="role">Role</label>
+          <label htmlFor="role">Função</label>
           <input
             id="role"
-            {...register("role", { required: "Role is required" })}
+            {...register("role", { required: "A função é obrigatória" })}
             className="input"
           />
           {errors.role && <p>{errors.role.message}</p>}
         </div>
         <div>
-          <label htmlFor="location">Location</label>
+          <label htmlFor="location">Localização</label>
           <input
             id="location"
-            {...register("location", { required: "Location is required" })}
+            {...register("location", { required: "A localização é obrigatória" })}
             className="input"
           />
           {errors.location && <p>{errors.location.message}</p>}
@@ -132,10 +132,10 @@ const Profile: React.FC = () => {
             type="email"
             id="email"
             {...register("email", {
-              required: "Email is required",
+              required: "O email é obrigatório",
               pattern: {
                 value: /^\S+@\S+$/i,
-                message: "Invalid email address",
+                message: "Endereço de email inválido",
               },
             })}
             className="input"
@@ -146,26 +146,26 @@ const Profile: React.FC = () => {
           <label htmlFor="linkedin">LinkedIn</label>
           <input
             id="linkedin"
-            {...register("linkedin", { required: "LinkedIn is required" })}
+            {...register("linkedin", { required: "O LinkedIn é obrigatório" })}
             className="input"
           />
           {errors.linkedin && <p>{errors.linkedin.message}</p>}
         </div>
         <div>
-          <label htmlFor="portfolio">Portfolio</label>
+          <label htmlFor="portfolio">Portfólio</label>
           <input id="portfolio" {...register("portfolio")} className="input" />
         </div>
         <div>
-          <label htmlFor="summary">Summary</label>
+          <label htmlFor="summary">Resumo</label>
           <textarea
             id="summary"
-            {...register("summary", { required: "Summary is required" })}
+            {...register("summary", { required: "O resumo é obrigatório" })}
             className="textarea"
           />
           {errors.summary && <p>{errors.summary.message}</p>}
         </div>
         <div>
-          <label htmlFor="experiences">Experiences</label>
+          <label htmlFor="experiences">Experiências</label>
           <textarea
             id="experiences"
             {...register("experiences")}
@@ -173,16 +173,16 @@ const Profile: React.FC = () => {
           />
         </div>
         <div>
-          <label htmlFor="languages">Languages</label>
+          <label htmlFor="languages">Idiomas</label>
           <input
             id="languages"
-            {...register("languages", { required: "Languages are required" })}
+            {...register("languages", { required: "Os idiomas são obrigatórios" })}
             className="input"
           />
           {errors.languages && <p>{errors.languages.message}</p>}
         </div>
         <div>
-          <label htmlFor="availability">Availability</label>
+          <label htmlFor="availability">Disponibilidade</label>
           <input
             id="availability"
             {...register("availability")}
@@ -191,19 +191,19 @@ const Profile: React.FC = () => {
         </div>
         <div>
           <label htmlFor="desiredSalary">
-            Desired Salary (number + currency)
+            Salário desejado (número + moeda)
           </label>
           <input
             id="desiredSalary"
             {...register("desiredSalary", {
-              required: "Desired Salary is required",
+              required: "O salário desejado é obrigatório",
             })}
             className="input"
           />
           {errors.desiredSalary && <p>{errors.desiredSalary.message}</p>}
         </div>
         <div>
-          <label htmlFor="address">Address</label>
+          <label htmlFor="address">Endereço</label>
           <input id="address" {...register("address")} className="input" />
         </div>
 
@@ -228,7 +228,7 @@ const Profile: React.FC = () => {
           {errors.cvPortuguese && <p>{errors.cvPortuguese.message}</p>}
         </div>
         <div>
-          <label htmlFor="clEnglish">CL em Inglês</label>
+          <label htmlFor="clEnglish">Cover Letter em Inglês</label>
           <input
             type="file"
             id="clEnglish"
@@ -238,7 +238,7 @@ const Profile: React.FC = () => {
           {errors.clEnglish && <p>{errors.clEnglish.message}</p>}
         </div>
         <div>
-          <label htmlFor="clPortuguese">CL em Português</label>
+          <label htmlFor="clPortuguese">Cover Letter em Português</label>
           <input
             type="file"
             id="clPortuguese"
@@ -249,7 +249,7 @@ const Profile: React.FC = () => {
         </div>
 
         <button type="submit" className="button">
-          Submit
+          Enviar
         </button>
       </form>
     </div>

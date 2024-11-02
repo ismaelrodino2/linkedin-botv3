@@ -1,7 +1,8 @@
-import { MenuIcon } from "lucide-react";
+import { BoxIcon, LayersIcon, MenuIcon, UserRoundIcon } from "lucide-react";
 import React from "react";
 import { Sidebar, Menu, MenuItem, MenuItemStyles } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
+
 
 export const NavBar = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -10,54 +11,61 @@ export const NavBar = ({ children }: { children: React.ReactNode }) => {
 
   const menuItemStyles: MenuItemStyles = {
     root: {
-      fontSize: "13px",
+      fontSize: "14px",
       fontWeight: 400,
+      color: "#4A4A4A",
+      "&:hover": {
+        backgroundColor: "#f0f0f0",
+      },
+    },
+    icon: {
+      color: "#4A4A4A",
     },
     SubMenuExpandIcon: {
       color: "#b6b7b9",
     },
     label: ({ open }) => ({
-      fontWeight: open ? 600 : undefined,
+      fontWeight: open ? 600 : 400,
+      color: open ? "#333" : "#4A4A4A",
     }),
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100%",
-      }}
-    >
-      <Sidebar
-        collapsed={collapsed}
-        toggled={toggled}
-        onBackdropClick={() => setToggled(false)}
-        breakPoint="md"
-      >
-        <div
-          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+    <div style={{ display: "flex", height: "100vh" }}>
+    <Sidebar className="app" collapsed={collapsed}>
+      <Menu >
+        <MenuItem
+        onClick={() => {
+          setCollapsed(!collapsed);
+         }}
+          className="menu1"
+          icon={<MenuIcon   />}
         >
-          <div style={{ flex: 1, marginBottom: "32px" }}>
-            <button
-              style={{ padding: "0 24px", marginBottom: "8px" }}
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              <MenuIcon size={48} />
-            </button>
-            <Menu menuItemStyles={menuItemStyles}>
-                <MenuItem>
-                  <Link to="/profile">Profile</Link>
-                </MenuItem>
-                <MenuItem>
-                  <Link to="/">Home</Link>
-                </MenuItem>
-            </Menu>
-  
-          </div>
-        </div>
-      </Sidebar>
-
-      <main>{children}</main>
-    </div>
+        </MenuItem>
+        <MenuItem
+          component={<Link to="/" className="link" />}
+          icon={<LayersIcon  />}
+        >
+          Dashboard
+        </MenuItem>
+        <MenuItem
+          component={<Link to="/profile" className="link" />}
+          icon={<BoxIcon  />}
+        >
+          Perfil
+        </MenuItem>
+        {/* <MenuItem
+          component={<Link to="dashboard" className="link" />}
+          icon={<UserRoundIcon />}
+        >
+          Minha conta
+        </MenuItem> */}
+   
+      </Menu>
+    </Sidebar>
+    <section>
+      {children}
+    </section>
+  </div>
   );
 };
