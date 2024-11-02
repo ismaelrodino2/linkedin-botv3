@@ -6,7 +6,6 @@ import "./index.css";
 import { NavBar } from "./components/navbar.tsx";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { ProSidebarProvider } from "react-pro-sidebar";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

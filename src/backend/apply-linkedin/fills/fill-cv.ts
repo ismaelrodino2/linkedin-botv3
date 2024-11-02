@@ -5,22 +5,6 @@ import { Page } from "puppeteer";
 export async function fillCv(page: Page, language:string): Promise<void> {
   const docDivs = await page.$$(selectors.documentUpload);
 
-  // Obtenha todos os elementos de rótulo ou span dentro do formulário
-  const elements = await page.$$eval('.jobs-easy-apply-content form *', elements =>
-    elements.map(element => element.textContent?.trim())
-  );
-
-  // Verifique se algum elemento contém o texto "currículo"
-  const foundTextCvPt = elements.some(
-    (text) => text?.toLocaleLowerCase() === "currículo"
-  );
-  // Verifique se algum elemento contém o texto "carta de apresentação"
-  const foundTextClPt = elements.some(
-    (text) => text?.toLocaleLowerCase() === "carta de apresentação"
-  );
-
-  console.log("foundTextCvPt", foundTextCvPt);
-
   for (const docDiv of docDivs) {
     const label = (await docDiv.$(
       selectors.documentUploadLabel
