@@ -127,12 +127,12 @@ export async function applyJobs({
     }
 
     addJobToArrayLinkedin({
-      company: "test",
+      company: fields.company,
       currentDateTime: new Date(),
       language: language,
-      location: "test",
-      platform: "test",
-      position: "test",
+      location: fields.location,
+      platform: fields.platform,
+      position: fields.position,
     });
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
@@ -141,20 +141,23 @@ export async function applyJobs({
 }
 
 async function getJobInfo(page: Page, language: string) {
-// Espera o primeiro elemento estar visível
-const h1 = await page.waitForSelector(".t-24.t-bold.inline > a", { visible: true, timeout: 5000 });
+  // Espera o primeiro elemento estar visível
+  const h1 = await page.waitForSelector(".t-24.t-bold.inline > a", {
+    visible: true,
+    timeout: 5000,
+  });
 
-const companyNameElement = await page.waitForSelector(
-  ".job-details-jobs-unified-top-card__company-name > a", 
-  { visible: true, timeout: 5000 }
-);
+  const companyNameElement = await page.waitForSelector(
+    ".job-details-jobs-unified-top-card__company-name > a",
+    { visible: true, timeout: 5000 }
+  );
 
-const firstSpanElement = await page.waitForSelector(
-  ".job-details-jobs-unified-top-card__primary-description-container > div span:first-child", 
-  { visible: true, timeout: 5000 }
-);
+  const firstSpanElement = await page.waitForSelector(
+    ".job-details-jobs-unified-top-card__primary-description-container > div span:first-child",
+    { visible: true, timeout: 5000 }
+  );
 
-  console.log("qqqqqqqqq", h1,companyNameElement, firstSpanElement)
+  console.log("qqqqqqqqq", h1, companyNameElement, firstSpanElement);
 
   const position = await h1?.evaluate((el) => el.innerText);
 

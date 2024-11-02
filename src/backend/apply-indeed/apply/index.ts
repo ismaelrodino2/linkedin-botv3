@@ -41,21 +41,19 @@ export async function applyJobs({
 
   await wait(1245);
 
-  // Extrai o texto do primeiro filho do elemento #jobDescriptionText
-  const jobDescriptionText = await page.evaluate(() => {
-    const element = document.querySelector("#jobDescriptionText");
-    if (element && element.firstElementChild) {
-      return element.firstElementChild.textContent?.trim();
-    }
-    return null; // Retorna null se o elemento ou o primeiro filho não existir
-  });
-
-  console.log("Texto extraído:", jobDescriptionText);
-
   const lngDetector = new LanguageDetect();
 
   // OR
   // const lngDetector = new (require('languagedetect'));
+  const jobDescriptionElements = await page.$$("#jobDescriptionText p");
+
+  const jobDescriptionText = await Promise.all(
+    jobDescriptionElements.map((element) =>
+      element.evaluate((el) => el.innerText)
+    )
+  ).then((textArray) => textArray.join(" "));
+
+  console.log("jobsearch-JobInfoHeader-title-container :", jobDescriptionText);
 
   if (jobDescriptionText) {
     const lang = lngDetector.detect(jobDescriptionText, 1);
@@ -63,8 +61,12 @@ export async function applyJobs({
     console.log("lang", lang);
 
     setPromptLanguage(lang[0][0]);
-    language = lang[0][0]
+    language = lang[0][0];
   }
+
+  const fields = await getJobInfo(page, language); //erro por aqui -> acho q essa função ta trancando tudo pq ele n ta precionando o botão p aplicar na vaga
+
+  console.log("qqqqqqqqq3", fields);
 
   console.log("chegou na pagina"); //erro por aqui
 
@@ -84,13 +86,9 @@ export async function applyJobs({
 
   await sleep(3000);
 
-  //const fields = await getJobInfo(page); //erro por aqui -> acho q essa função ta trancando tudo pq ele n ta precionando o botão p aplicar na vaga
-
   try {
     console.log("Applying to", link);
     // [TODO] change this var
-    // await clickApplyButton(page);
-    // await clickApplyButton(page);
 
     let maxPages = 7;
     // let maxTries = 2;
@@ -113,20 +111,16 @@ export async function applyJobs({
       await clickNextButton(page);
 
       await sleep(1000);
-    
-      // if (fields) {
-      //   addJobToArrayIndeed(fields);
-      // }
     }
 
     addJobToArrayIndeed({
-      company: "test",
+      company: fields.company,
       currentDateTime: new Date(),
       language: language,
-      location: "test",
-      platform: "test",
-      position: "test"
-    })
+      location: fields.location, //to-do
+      platform: fields.platform,
+      position: fields.position,
+    });
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
@@ -166,61 +160,40 @@ async function checkandSubmit(page: Page, text: string) {
   }
 }
 
-// async function getJobInfo(page: Page) {
-//   const asideElements = await page.$$(
-//     'aside[aria-labelledby="ia-JobInfoCard-header-title"] span'
-//   ); //erro: retornando [] vazio
-//   console.log("encontrou o botao1", asideElements);
+async function getJobInfo(page: Page, language: string) {
+  // Espera o primeiro elemento estar visível
+  const h1 = await page.waitForSelector(
+    '[data-testid="jobsearch-JobInfoHeader-title"] > span',
+    { visible: true, timeout: 5000 }
+  );
 
-//   const position = await page.evaluate(
-//     (span) => span.innerText,
-//     asideElements[0]
-//   );
-//   const companyAndLocation = await page.evaluate(
-//     (span) => span.innerText,
-//     asideElements[1]
-//   );
+  const companyNameElement = await page.waitForSelector(
+    '[data-testid="inlineHeader-companyName"] > span > a',
+    { visible: true, timeout: 5000 }
+  );
 
-//   const parts = companyAndLocation.split(" - ");
+  const locationElement = await page.waitForSelector(
+    '[data-testid="inlineHeader-companyLocation"] > div',
+    { visible: true, timeout: 5000 }
+  );
 
-//   // Accessing the separated parts
-//   const company = parts[0]; // "Grupo Mec"
-//   const location = parts[1]; // "Rio de Janeiro, RJ"
+  console.log("qqqqqqqqq", h1, companyNameElement, locationElement);
 
-//   const currentDateTime = new Date();
+  const position = await h1?.evaluate((el) => el.innerText);
 
-//   const buttonElement = await page.$(
-//     'button[data-testid="ExitLinkWithModalComponent-exitButton"] span'
-//   );
+  const company = await companyNameElement?.evaluate((el) => el.innerText);
 
-//   console.log("encontrou o botao2", buttonElement);
+  const location = await locationElement?.evaluate((el) => el.innerText); //foi
 
-//   let language: string | null = null;
+  const currentDateTime = new Date();
+  console.log("qqqqqqqqq2", position, company, location);
 
-//   if (buttonElement) {
-//     const spanText = await page.evaluate(
-//       (span) => span.innerText,
-//       buttonElement
-//     );
-//     console.log("Span text:", spanText);
-
-//     const languageMap: { [key: string]: string } = {
-//       Sair: "Portuguese",
-//       Exit: "English",
-//     };
-
-//     // Use a type assertion to indicate spanText is one of the keys in the languageMap
-//     language = languageMap[spanText as keyof typeof languageMap] || null; // Default to null if not found
-//   } else {
-//     console.log("Button with specified data-testid not found");
-//   }
-
-//   return {
-//     position,
-//     company,
-//     location,
-//     currentDateTime,
-//     platform: "Indeed",
-//     language,
-//   };
-// }
+  return {
+    position,
+    company,
+    location,
+    currentDateTime,
+    platform: "Indeed",
+    language,
+  };
+}
