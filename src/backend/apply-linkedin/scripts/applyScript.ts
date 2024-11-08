@@ -14,7 +14,15 @@ async function clickDismissButton(page: Page) {
   }
 }
 
-export async function applyScript(page: Page, model: GenerativeModel, addJobToArrayLinkedin: (jobs: JobInfo)=>void, appliedJobsLinkedin: JobInfo[], maxIterations: number) {
+export async function applyScript(
+  page: Page,
+  model: GenerativeModel,
+  addJobToArrayLinkedin: (jobs: JobInfo) => void,
+  appliedJobsLinkedin: JobInfo[],
+  maxIterations: number,
+  stopApplyingLinkedin: boolean,
+  pauseApplyingLinkedin: boolean
+) {
   let validLinks = await generateLinks(page);
 
   console.log("validLinks", validLinks, validLinks.length);
@@ -25,9 +33,13 @@ export async function applyScript(page: Page, model: GenerativeModel, addJobToAr
   }
 
   for (const link of validLinks) {
-    if (appliedJobsLinkedin.length >= maxIterations) {
+    while (pauseApplyingLinkedin) {
+      console.log("Processo pausado...");
+      await wait(500); // Espera 500 ms antes de checar novamente
+    }
+    if (appliedJobsLinkedin.length >= maxIterations && stopApplyingLinkedin) {
       // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
-      validLinks=[]
+      validLinks = [];
       break;
     }
     await wait(350);

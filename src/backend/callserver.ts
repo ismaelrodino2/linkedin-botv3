@@ -108,9 +108,9 @@ async function scrollToBottomAndBackSmoothly(
 export function callServer() {
   const appliedJobsIndeed: JobInfo[] = []; //will come from api
   const appliedJobsLinkedin: JobInfo[] = []; //will come from api
-// Variáveis globais para armazenar genAI e o modelo
-let genAI: GoogleGenerativeAI | null = null;
-let model: any = null;
+  // Variáveis globais para armazenar genAI e o modelo
+  let genAI: GoogleGenerativeAI | null = null;
+  let model: any = null;
 
   const app = express();
   const port = 3000;
@@ -119,8 +119,6 @@ let model: any = null;
 
   app.use(cors());
   app.use(json());
-
-
 
   app.get("/", (_, res: Response) => {
     res.send("Servidor Express está funcionando!");
@@ -198,9 +196,8 @@ let model: any = null;
         maxApplications,
       }; // Armazenando o valor globalmente
 
-       genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-       model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
@@ -208,7 +205,7 @@ let model: any = null;
       const { page } = await connect({
         headless: false,
 
-        args: [],
+        args: ['--start-maximized'],
 
         customConfig: {
           userDataDir: userDataDir,
@@ -221,8 +218,12 @@ let model: any = null;
         disableXvfb: false,
         ignoreAllFlags: false,
       });
-//@ts-ignore
+      //@ts-ignore
       pageInstance = page;
+
+      page.setViewport({
+        width: 1366, height: 768
+      })
 
       await pageInstance.goto("https://www.google.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
@@ -250,8 +251,13 @@ let model: any = null;
     }
   });
 
+  let stopApplyingLinkedin = false; // Variável de controle para parar o processo
+  let pauseApplyingLinkedin = false; // Variável para pausar o processo
+
   //linkedin
   app.post("/apply-linkedin", async (_req: Request, res: Response) => {
+    stopApplyingLinkedin = false; // Reinicia o sinalizador ao começar o processo
+
     const maxIterations = (global as any).globalVars.maxApplications; // Acessando a variável global //decided for us, number around 150 iterations for paid
     console.log("browserInstance", pageInstance);
 
@@ -259,7 +265,10 @@ let model: any = null;
       appliedJobsLinkedin.push(el); //to-do: aqui n funfa: ele msm com 4 itens não para, talvez n esteja passando por aqqui td hora
     }
 
-    while (appliedJobsLinkedin.length < maxIterations) {
+    while (
+      appliedJobsLinkedin.length < maxIterations &&
+      !stopApplyingLinkedin
+    ) {
       try {
         await scrollToBottomAndBackSmoothly(
           pageInstance,
@@ -271,7 +280,9 @@ let model: any = null;
           model,
           addJobToArrayLinkedin,
           appliedJobsLinkedin,
-          maxIterations
+          maxIterations,
+          stopApplyingLinkedin,
+          pauseApplyingLinkedin
         );
         await sleep(350);
         await navigateToNextPage(pageInstance, 25);
@@ -283,7 +294,25 @@ let model: any = null;
     console.log("jobs aplicados:", appliedJobsLinkedin);
 
     res.send("Puppeteer test completed successfully.");
-    await pageInstance.close()
+    await pageInstance.close();
+  });
+
+  // Rota para pausar o processo de aplicação
+  app.post("/pause-apply-linkedin", (_req: Request, res: Response) => {
+    pauseApplyingLinkedin = true;
+    res.send("Processo de aplicação pausado.");
+  });
+
+  // Rota para retomar o processo de aplicação
+  app.post("/resume-apply-linkedin", (_req: Request, res: Response) => {
+    pauseApplyingLinkedin = false;
+    res.send("Processo de aplicação retomado.");
+  });
+
+  // Rota para parar o processo de aplicação
+  app.post("/stop-apply-linkedin", (_req: Request, res: Response) => {
+    stopApplyingLinkedin = true; // Sinaliza o processo para parar
+    res.send("Processo de aplicação interrompido.");
   });
 
   //indeed
@@ -323,7 +352,7 @@ let model: any = null;
     }
     console.log("jobs aplicados:", appliedJobsIndeed);
     res.send("Puppeteer test completed successfully.");
-    await pageInstance.close()
+    await pageInstance.close();
   });
 
   const server = app.listen(port, () => {

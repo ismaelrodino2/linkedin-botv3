@@ -79,8 +79,8 @@ export async function fillInputs(page: Page, model: GenerativeModel) {
 
           // Ajustar o prompt conforme número ou texto
           const prompt = isNumericInput
-            ? `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. The question is about a number, please respond with a number only. Write the correct answer concisely. Please use the format mm/dd/yyyy when entering a date, and give me only the date.`
-            : `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. If the question is about the city, please respond in the format: "City, Country" (e.g., "Rio de Janeiro, Brazil"). Write the correct answer. Be concise. Please use the format mm/dd/yyyy when entering a date, and give me only the date.`;
+            ? `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. The question is about a number, please respond with a number only. Write the correct answer concisely. Please use the format mm/dd/yyyy when entering a date, and give me only the date. Do not exceed 10 characters.`
+            : `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. If the question is about the city, please respond in the format: "City, Country" (e.g., "Rio de Janeiro, Brazil"). Write the correct answer. Be concise. Please use the format mm/dd/yyyy when entering a date, and give me only the date. Do not exceed 50 to 100 characters. If the question is about email, give the full email including @service.com. `;
           const result = await model.generateContent(prompt);
 
           let textResponse = result.response.text().trim();

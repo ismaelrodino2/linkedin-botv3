@@ -49,35 +49,8 @@ export async function fillInputs(page: Page, model: GenerativeModel) {
         } else {
           console.log("AI");
           // Caso o texto da label não corresponda a valores conhecidos
-          console.log("A classe do input não contém nenhum valor conhecido.");
-
-          // Get the input element's ID
-          const inputId = await page.evaluate((input) => input.id, textInput);
-          const inputClass = await page.evaluate(
-            (input) => input.className,
-            textInput
-          );
-
-          // Select the associated label using the "for" attribute that matches the input ID
-          const label = await page.$(`label[for="${inputId}"]`);
-
-          // Check if either input or label contains "-numeric" in their class
-          const labelClass = await page.evaluate(
-            (label) => label?.className,
-            label
-          );
-
-          // const isNumericInput =
-          //   inputClass.includes("-numeric") ||
-          //   labelClass?.includes("-numeric") ||
-          //   inputId.includes("-numeric");
-
-          console.log("Is numeric input:", inputClass, labelClass, inputId);
-
-          // Ajustar o prompt conforme número ou texto
-          // const prompt = isNumericInput
-          //   ? `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. The question is about a number, please respond with a number only. Write the correct answer concisely. Please use the format mm/dd/yyyy when entering a date, and give me only the date.`
-          const prompt = `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. If the question is about the city, please respond in the format: "City, Country" (e.g., "Rio de Janeiro, Brazil"). Write the correct answer. Be concise. Please use the format mm/dd/yyyy when entering a date, and give me only the date.`;
+     
+          const prompt = `${globalPrompt}. The following form item is an input with a label: ${associatedLabel}. If the question is about the city, please respond in the format: "City, Country" (e.g., "Rio de Janeiro, Brazil"). Write the correct answer. Be concise. Please use the format mm/dd/yyyy when entering a date, and give me only the date. Do not exceed 50 to 100 characters.`;
           const result = await model.generateContent(prompt);
 
           let textResponse = result.response.text().trim();
