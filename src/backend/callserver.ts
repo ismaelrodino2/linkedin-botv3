@@ -8,13 +8,12 @@ import { wait } from "./apply-linkedin/scripts/generate-links";
 import { Request, Response } from "express";
 import { applyScriptIndeed } from "./apply-indeed/apply-script-indeed";
 import { navigateToNextPage } from "./apply-linkedin/scripts/generate-pagination-links";
-import { connect } from "puppeteer-real-browser";
 import path from "path";
 import fs from "fs";
 import { createGlobalPrompt } from "./prompt";
 import multer from "multer";
 import { FormInputs } from "../routes/profile";
-import { Page } from "puppeteer";
+import { Page, executablePath, launch } from "puppeteer";
 
 config();
 
@@ -202,29 +201,39 @@ export function callServer() {
       // Agora a variável globalPrompt está disponível globalmente
       console.log("global.globalPrompt", global.globalPrompt);
 
-      const { page } = await connect({
-        headless: false,
+      // const { page } = await connect({
+      //   headless: false,
 
-        args: ['--start-maximized'],
+      //   // args: ['--start-maximized'],
 
-        customConfig: {
-          userDataDir: userDataDir,
-        },
+      //   customConfig: {
+      //     userDataDir: userDataDir,
+      //   },
 
-        turnstile: true,
+      //   turnstile: true,
 
-        connectOption: {},
+      //   connectOption: {},
 
-        disableXvfb: false,
-        ignoreAllFlags: false,
+      //   disableXvfb: false,
+      //   ignoreAllFlags: false,
+      // });
+
+      const browser = await launch({
+        headless: false, // Abre o navegador em modo visível
+        executablePath: executablePath(), // Garante que o Puppeteer use o navegador correto
+        args: [
+          '--start-maximized', // Inicia o navegador maximizado
+        ],
+        userDataDir, // Diretório para salvar dados persistentes do navegador
       });
+    
+      pageInstance = await browser.newPage();
+    
+      // Maximiza a janela manualmente (caso necessário)
+      const [width, height] = await pageInstance.evaluate(() => [window.screen.width, window.screen.height]);
+      await pageInstance.setViewport({ width, height });
+      
       //@ts-ignore
-      pageInstance = page;
-
-      page.setViewport({
-        width: 1366, height: 768
-      })
-
       await pageInstance.goto("https://www.google.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });
