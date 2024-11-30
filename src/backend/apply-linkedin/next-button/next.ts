@@ -8,7 +8,7 @@ export async function clickNext(page: Page) {
 
     // Verifica se o botão "Next" está presente antes de continuar
     const nextButton = await page.$(
-      ".jobs-easy-apply-content button[aria-label='Continue to next step']"
+      ".jobs-easy-apply-modal button[aria-label='Continue to next step']"
     );
     console.log("nextButton", nextButton);
     if (nextButton) {
@@ -18,14 +18,14 @@ export async function clickNext(page: Page) {
     } else {
       // Se o botão "Continue to next step" não existir, tenta "Review your application"
       const reviewButton = await page.$(
-        ".jobs-easy-apply-content button[aria-label='Review your application']"
+        ".jobs-easy-apply-modal button[aria-label='Review your application']"
       );
       if (reviewButton) {
         await reviewButton.click();
       } else {
         // Verifica se o botão "Submit application" está presente
         const submitButton = await page.$(
-          ".jobs-easy-apply-content button[aria-label='Submit application']"
+          ".jobs-easy-apply-modal button[aria-label='Submit application']"
         );
 
         console.log("submitButton", submitButton);
@@ -39,7 +39,7 @@ export async function clickNext(page: Page) {
           let dismissButton;
           try {
             dismissButton = await page.waitForSelector(
-              ".jobs-easy-apply-content form button[aria-label='Dismiss']",
+              ".jobs-easy-apply-modal form button[aria-label='Dismiss']",
               { visible: true, timeout: 3000 }
             );
           } catch (error) {

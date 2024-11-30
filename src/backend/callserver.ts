@@ -234,7 +234,7 @@ export function callServer() {
       await pageInstance.setViewport({ width, height });
       
       //@ts-ignore
-      await pageInstance.goto("https://www.google.com/", {
+      await pageInstance.goto("https://www.linkedin.com/", {
         waitUntil: ["domcontentloaded", "networkidle2"],
       });
 
@@ -279,9 +279,10 @@ export function callServer() {
       !stopApplyingLinkedin
     ) {
       try {
+        console.log("testeeee")
         await scrollToBottomAndBackSmoothly(
           pageInstance,
-          ".jobs-search-results-list"
+          ".scaffold-layout__list  > div"
         );
         await sleep(600);
         await applyScript(

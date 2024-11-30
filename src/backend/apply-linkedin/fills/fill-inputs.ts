@@ -6,7 +6,7 @@ import { Page } from "puppeteer";
 
 export async function fillInputs(page: Page, model: GenerativeModel) {
   const textInputs = await page.$$(
-    '.jobs-easy-apply-content form input[type="text"]'
+    '.jobs-easy-apply-modal form input[type="text"]'
   );
 
   console.log("textInputs1234", textInputs);

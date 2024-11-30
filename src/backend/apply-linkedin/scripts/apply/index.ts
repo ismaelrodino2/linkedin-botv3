@@ -57,6 +57,7 @@ export async function applyJobs({
 }: Params) {
   let bar1 = 0;
   let bar2 = 0;
+
   await page.goto(link, { waitUntil: "load", timeout: 30000 });
 
   const lngDetector = new LanguageDetect();
@@ -114,10 +115,10 @@ export async function applyJobs({
       if (bar1 === bar2) {
         console.log("Progress bar did not change, breaking loop...");
         const isSubmitButtonEn = page.$(
-          ".jobs-easy-apply-content button[aria-label='Submit application']"
+          ".jobs-easy-apply-modal button[aria-label='Submit application']"
         );
         const isSubmitButtonPt = page.$(
-          ".jobs-easy-apply-content button[aria-label='Enviar candidatura']"
+          ".jobs-easy-apply-modal button[aria-label='Enviar candidatura']"
         );
         if (!isSubmitButtonEn || !isSubmitButtonPt) {
           console.log("teste aqui 123321");

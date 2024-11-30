@@ -13,7 +13,7 @@ export const wait = (time: number) =>
 
 export async function generateLinks(page: Page) {
   // Seleciona todos os <li> dentro de um ul com a classe 'scaffold-layout__list-container'
-  const allLis = await page.$$(".scaffold-layout__list-container > li");
+  const allLis = await page.$$(".scaffold-layout__list > div > ul > li");
 
   await wait(1000);
 

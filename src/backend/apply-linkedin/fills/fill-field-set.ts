@@ -7,7 +7,7 @@ export function trimDots(text: string) {
 }
 
 export async function fillFieldSet(page: Page, model: GenerativeModel) {
-  const fieldsets = await page.$$(".jobs-easy-apply-content form fieldset");
+  const fieldsets = await page.$$(".jobs-easy-apply-modal form fieldset");
 
   console.log("fieldsets", fieldsets);
 

@@ -4,7 +4,7 @@ import { trimDots } from "./fill-field-set";
 import { Page } from "puppeteer";
 
 export async function fillSelects(page: Page, model: GenerativeModel) {
-  const selects = await page.$$(".jobs-easy-apply-content form select");
+  const selects = await page.$$(".jobs-easy-apply-modal form select");
 
   if (selects.length > 0) {
     for (const select of selects) {

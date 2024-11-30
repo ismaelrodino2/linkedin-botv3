@@ -4,7 +4,7 @@ import { GenerativeModel } from "@google/generative-ai";
 import { Page } from "puppeteer";
 
 export async function fillTextAreas(page: Page, model: GenerativeModel) {
-  const textAreas = await page.$$(".jobs-easy-apply-content form textarea");
+  const textAreas = await page.$$(".jobs-easy-apply-modal form textarea");
 
   console.log("textAreas123", textAreas);
 
