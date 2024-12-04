@@ -1,9 +1,8 @@
-import "../App.css";
 
 function Home() {
   async function handleLogin(link:string) {
 
-    const url = "http://localhost:3000/navigate";
+    const url = "http://localhost:3001/navigate";
 
     const options = {
       method: "POST",
@@ -28,7 +27,7 @@ function Home() {
     const savedData = localStorage.getItem("userProfile");
     const defaultValues = savedData ? {...JSON.parse(savedData), startDate: new Date()} : {};
 
-    const url = "http://localhost:3000/open";
+    const url = "http://localhost:3001/open";
 
     const options = {
       method: "POST",
@@ -53,7 +52,7 @@ function Home() {
 
 
   async function handleSubmitLinkedin() {
-    const url = "http://localhost:3000/apply-linkedin";
+    const url = "http://localhost:3001/apply-linkedin";
 
     const options = {
       method: "POST",
@@ -69,7 +68,7 @@ function Home() {
   }
 
   async function handleSubmitIndeed() {
-    const url = "http://localhost:3000/apply-indeed";
+    const url = "http://localhost:3001/apply-indeed";
 
     const options = {
       method: "POST",

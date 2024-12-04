@@ -1,12 +1,13 @@
 import { fillFields } from "../fill-fields";
 import clickNextButton from "../clickNextButton";
 import { GenerativeModel } from "@google/generative-ai";
-import { JobInfo, sleep } from "../../../callserver";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
 import { Page } from "puppeteer";
 import LanguageDetect from "languagedetect";
+import { JobInfo } from "../../../types";
+import { sleep } from "../../../utils";
 
 const noop = () => {};
 

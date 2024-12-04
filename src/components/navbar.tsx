@@ -1,48 +1,30 @@
-import { BoxIcon, LayersIcon, MenuIcon } from "lucide-react";
-import React from "react";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import "./navbar.css";
+import ModeToggle from "./ui/theme-toggle/theme-toggle";
 
-
-export const NavBar = ({ children }: { children: React.ReactNode }) => {
-  const [collapsed, setCollapsed] = React.useState(false);
-
+export const NavBar = () => {
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-    <Sidebar className="app" collapsed={collapsed}>
-      <Menu >
-        <MenuItem
-        onClick={() => {
-          setCollapsed(!collapsed);
-         }}
-          className="menu1"
-          icon={<MenuIcon   />}
-        >
-        </MenuItem>
-        <MenuItem
-          component={<Link to="/" className="link" />}
-          icon={<LayersIcon  />}
-        >
-          Dashboard
-        </MenuItem>
-        <MenuItem
-          component={<Link to="/profile" className="link" />}
-          icon={<BoxIcon  />}
-        >
-          Perfil
-        </MenuItem>
-        {/* <MenuItem
-          component={<Link to="dashboard" className="link" />}
-          icon={<UserRoundIcon />}
-        >
-          Minha conta
-        </MenuItem> */}
-   
-      </Menu>
-    </Sidebar>
-    <section>
-      {children}
-    </section>
-  </div>
+    <div style={{ display: "flex", flexDirection: "column", position: 'fixed', width: '100%',
+      top: 0 }}>
+      <nav className="navbar">
+        <Link to="/" className="logo">
+          Wish Apply
+        </Link>
+
+        <ul className="nav-links">
+          <li>
+            <NavLink to="/dashboard">Dashboard</NavLink>
+          </li>
+          <li>
+            <NavLink to="/profile">Perfil</NavLink>
+          </li>
+          <li>
+            <NavLink to="/profile">Minha Conta</NavLink>
+          </li>
+        </ul>
+
+        <ModeToggle />
+      </nav>
+    </div>
   );
 };

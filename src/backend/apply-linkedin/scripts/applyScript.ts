@@ -1,8 +1,8 @@
 import { GenerativeModel } from "@google/generative-ai";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
-import { JobInfo } from "../../callserver";
 import { Page } from "puppeteer";
+import { JobInfo } from "../../types";
 
 async function clickDismissButton(page: Page) {
   try {

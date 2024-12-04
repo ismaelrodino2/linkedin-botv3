@@ -26,4 +26,7 @@ export default defineConfig({
         : {},
     }),
   ],
+  server: {
+    port: 3002, // Substitua pelo número da porta desejada
+  },
 })

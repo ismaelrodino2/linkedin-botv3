@@ -1,5 +1,5 @@
-import { sleep } from "../../callserver";
 import { Page } from "puppeteer";
+import { sleep } from "../../utils";
 
 // Função principal para clicar nos botões e verificar progresso
 export async function clickNext(page: Page) {
