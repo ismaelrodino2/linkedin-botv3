@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AuthProvider>
           <NavBar />
-          <div style={{marginTop: 100}}>
+          <div style={{marginTop: 70}}>
             <App />
           </div>
         </AuthProvider>

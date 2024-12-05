@@ -84,7 +84,7 @@ function Home() {
   }
 
   return (
-    <div className="reduced-height">
+    <div style={{height: '100%',  minHeight: 'calc(100vh - 70px)'}}>
       <button onClick={handleOpenBrowser}>Open browser</button>
       <button onClick={()=>handleLogin("https://www.linkedin.com/login")}>Login - Linkedin</button>
       <button onClick={()=>handleLogin("https://secure.indeed.com/auth")}>Login - Indeed</button>

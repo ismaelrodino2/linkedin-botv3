@@ -59,8 +59,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-sm p-6 shadow-md">
+      <Card style={{height: '100%',  minHeight: 'calc(100vh - 70px)'}}>
         <CardHeader>
           <CardTitle className="text-xl text-center">Login</CardTitle>
         </CardHeader>
@@ -129,6 +128,5 @@ export default function Login() {
           </FormProvider>
         </CardContent>
       </Card>
-    </div>
   );
 }

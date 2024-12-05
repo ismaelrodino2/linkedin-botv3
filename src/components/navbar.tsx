@@ -13,7 +13,7 @@ export const NavBar = () => {
 
         <ul className="nav-links">
           <li>
-            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/">Dashboard</NavLink>
           </li>
           <li>
             <NavLink to="/profile">Perfil</NavLink>

@@ -77,7 +77,7 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} style={{ padding: '0.5rem 0' }} {...props} />
+      <div ref={ref} style={{ padding: '0.5rem 0', display: 'flex', gap: 9, flexDirection: 'column' }} {...props} />
     </FormItemContext.Provider>
   )
 })

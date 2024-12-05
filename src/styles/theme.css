@@ -11,17 +11,17 @@ and the foreground color will be hsl(var(--primary-foreground)). */
 
 :root {
   /* Your default theme */
-  --background: #F0F0F0;
-  --foreground: 0 0% 100%;
+  --background:  0 0% 94%;
+  --foreground: 0 0% 0%;
   --muted: 215.4 16.3% 46.9%;
   --muted-foreground: 210 40% 96.1%;
   --card: 222.2 47.4% 11.2%;
   --card-foreground: 0 0% 100%;
   --popover: 222.2 47.4% 11.2%;
   --popover-foreground: 0 0% 100%;
-  --border: 214.3 31.8% 91.4%;
+  --border: 0 0% 85%;
   --input: 214.3 31.8% 91.4%;
-  --primary: 210 40% 98%;
+  --primary: 0 0% 41%;
   --primary-foreground: 222.2 47.4% 11.2%;
   --secondary: 222.2 47.4% 11.2%;
   --secondary-foreground: 210 40% 96.1%;
@@ -35,6 +35,8 @@ and the foreground color will be hsl(var(--primary-foreground)). */
   --success-foreground: 146 76% 13%;
   --ring: 215 20.2% 65.1%;
   --radius: 0.5rem;
+  --bg-container: #f4f2ee;
+  --bg-section: #F5F5F5;
 }
 
 [data-theme='dark'] {
@@ -62,6 +64,8 @@ and the foreground color will be hsl(var(--primary-foreground)). */
   --success-foreground: 146 76% 49%;
   --ring: 215 20.2% 65.1%;
   --radius: 0.5rem;
+  --bg-container: #444444;
+  --bg-section: #444444;
 }
 
 /* add more styles here if you want */
