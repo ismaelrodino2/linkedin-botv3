@@ -1,24 +1,40 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, FormProvider } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "../components/ui/button/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form/form"
-import { Input } from "../components/ui/input/input"
-import { Textarea } from "../components/ui/textarea/textarea"
-import { Checkbox } from "../components/ui/checkbox/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select/select"
-import styles from './profile.module.css'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, FormProvider } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "../components/ui/button/button";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form/form";
+import { Input } from "../components/ui/input/input";
+import { Textarea } from "../components/ui/textarea/textarea";
+import { Checkbox } from "../components/ui/checkbox/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select/select";
+import styles from "./profile.module.css";
+import { TrashIcon } from "lucide-react";
+import { toast } from "react-toastify";
 
-const languageLevels = ["Basic", "Intermediate", "Advanced", "Native"] as const
-const softwareLevels = ["Basic", "Intermediate", "Advanced"] as const
+const languageLevels = ["Basic", "Intermediate", "Advanced", "Native"] as const;
+const softwareLevels = ["Basic", "Intermediate", "Advanced"] as const;
 
 const formSchema = z.object({
   aboutMe: z.string().min(10, "About me should be at least 10 characters"),
   experience: z.string().min(10, "Experience should be at least 10 characters"),
-  links: z.array(z.object({
-    name: z.string(),
-    url: z.string().url("Must be a valid URL"),
-  })),
+  links: z.array(
+    z.object({
+      name: z.string(),
+      url: z.string().url("Must be a valid URL"),
+    })
+  ),
   availability: z.object({
     canTravel: z.boolean().optional(),
     canWorkInPerson: z.boolean().optional(),
@@ -26,27 +42,39 @@ const formSchema = z.object({
     immediateStart: z.boolean().optional(),
     canWorkHybrid: z.boolean().optional(),
   }),
-  languages: z.array(z.object({
-    language: z.string(),
-    level: z.enum(languageLevels),
-  })),
-  softwares: z.array(z.object({
-    name: z.string(),
-    yearsOfExperience: z.string(),
-    level: z.enum(softwareLevels),
-  })),
-  softSkills: z.string().min(10, "Soft skills should be at least 10 characters"),
-  hardSkills: z.string().min(10, "Hard skills should be at least 10 characters"),
-  proficiency: z.string().min(10, "Proficiency should be at least 10 characters"),
+  languages: z.array(
+    z.object({
+      language: z.string(),
+      level: z.enum(languageLevels),
+    })
+  ),
+  softwares: z.array(
+    z.object({
+      name: z.string(),
+      yearsOfExperience: z.string(),
+      level: z.enum(softwareLevels),
+    })
+  ),
+  softSkills: z
+    .string()
+    .min(10, "Soft skills should be at least 10 characters"),
+  hardSkills: z
+    .string()
+    .min(10, "Hard skills should be at least 10 characters"),
+  proficiency: z
+    .string()
+    .min(10, "Proficiency should be at least 10 characters"),
   cv1: z.any().optional(),
   cv2: z.any().optional(),
   coverLetter1: z.any().optional(),
   coverLetter2: z.any().optional(),
-  technologies: z.array(z.object({
-    name: z.string(),
-    yearsOfExperience: z.string(),
-  })),
-})
+  technologies: z.array(
+    z.object({
+      name: z.string(),
+      yearsOfExperience: z.string(),
+    })
+  ),
+});
 
 export default function ProfileForm() {
   const methods = useForm<z.infer<typeof formSchema>>({
@@ -64,27 +92,75 @@ export default function ProfileForm() {
         canWorkHybrid: false,
       },
     },
-  })
+  });
 
-  const { formState: { errors } } = methods
+  const {
+    formState: { errors },
+  } = methods;
 
-  function onSubmit(values: z.infer<typeof formSchema>, e: any) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log("Form Values:", values)
-      console.log("Form Errors:", errors)
+      const formData = new FormData();
+
+      if (values.cv1 instanceof File) formData.append("cv1", values.cv1);
+      if (values.cv2 instanceof File) formData.append("cv2", values.cv2);
+      if (values.coverLetter1 instanceof File)
+        formData.append("coverLetter1", values.coverLetter1);
+      if (values.coverLetter2 instanceof File)
+        formData.append("coverLetter2", values.coverLetter2);
+
+      const dataWithoutFiles = {
+        ...values,
+        cv1: values.cv1 instanceof File ? values.cv1.name : null,
+        cv2: values.cv2 instanceof File ? values.cv2.name : null,
+        coverLetter1:
+          values.coverLetter1 instanceof File ? values.coverLetter1.name : null,
+        coverLetter2:
+          values.coverLetter2 instanceof File ? values.coverLetter2.name : null,
+      };
+
+      formData.append("data", JSON.stringify(dataWithoutFiles));
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/create-account`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      toast("Your profile has been created successfully.", { type: "success" });
     } catch (error) {
-      console.error("Submit Error:", error)
+      console.error("Submission error:", error);
+      toast("Error", { type: "error" });
     }
   }
 
   const onError = (errors: any) => {
-    console.error('Form Validation Errors:', errors)
-  }
+    console.error("Form Validation Errors:", errors);
+    toast("Please check all required fields", { type: "warning" });
+  };
 
   return (
-    <div style={{height: '100%',  minHeight: 'calc(100vh - 70px)', backgroundColor: 'var(--bg-container)'}}>
+    <div
+      style={{
+        height: "100%",
+        minHeight: "calc(100vh - 70px)",
+        backgroundColor: "var(--bg-container)",
+      }}
+    >
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit, onError)} className={styles.form}>
+        <form
+          onSubmit={methods.handleSubmit(onSubmit, onError)}
+          className={styles.form}
+        >
           <div className={styles.section}>
             <FormField
               control={methods.control}
@@ -93,7 +169,14 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>About Me</FormLabel>
                   <FormControl>
-                    <Textarea {...field} style={{width: '100%', height: '100%', boxSizing: 'border-box'}} />
+                    <Textarea
+                      {...field}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +201,7 @@ export default function ProfileForm() {
           <div className={styles.section}>
             <h3>Links</h3>
             <div className={styles.languagesGrid}>
-              {methods.watch('links').map((_, index) => (
+              {methods.watch("links").map((_, index) => (
                 <div key={index} className={styles.languageRow}>
                   <FormField
                     control={methods.control}
@@ -127,7 +210,10 @@ export default function ProfileForm() {
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="e.g. LinkedIn, Portfolio, GitHub" />
+                          <Input
+                            {...field}
+                            placeholder="e.g. LinkedIn, Portfolio, GitHub"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -151,9 +237,14 @@ export default function ProfileForm() {
               <Button
                 type="button"
                 style={{
-                  alignSelf: 'self-end'
+                  alignSelf: "self-end",
                 }}
-                onClick={() => methods.setValue('links', [...methods.watch('links'), { name: "", url: "" }])}
+                onClick={() =>
+                  methods.setValue("links", [
+                    ...methods.watch("links"),
+                    { name: "", url: "" },
+                  ])
+                }
               >
                 Add Link
               </Button>
@@ -182,7 +273,9 @@ export default function ProfileForm() {
                 name="availability.canWorkInPerson"
                 render={({ field }) => (
                   <FormItem className={styles.availabilityItem}>
-                    <div className={styles.availabilityLabel}>To work in person ?</div>
+                    <div className={styles.availabilityLabel}>
+                      To work in person ?
+                    </div>
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -197,7 +290,9 @@ export default function ProfileForm() {
                 name="availability.needsSponsor"
                 render={({ field }) => (
                   <FormItem className={styles.availabilityItem}>
-                    <div className={styles.availabilityLabel}>If approved, would I need a Sponsor ?</div>
+                    <div className={styles.availabilityLabel}>
+                      If approved, would I need a Sponsor ?
+                    </div>
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -212,7 +307,9 @@ export default function ProfileForm() {
                 name="availability.immediateStart"
                 render={({ field }) => (
                   <FormItem className={styles.availabilityItem}>
-                    <div className={styles.availabilityLabel}>For immediate start ?</div>
+                    <div className={styles.availabilityLabel}>
+                      For immediate start ?
+                    </div>
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -227,7 +324,9 @@ export default function ProfileForm() {
                 name="availability.canWorkHybrid"
                 render={({ field }) => (
                   <FormItem className={styles.availabilityItem}>
-                    <div className={styles.availabilityLabel}>To work in a hybrid way ?</div>
+                    <div className={styles.availabilityLabel}>
+                      To work in a hybrid way ?
+                    </div>
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -242,7 +341,7 @@ export default function ProfileForm() {
           <div className={styles.section}>
             <h3>Languages</h3>
             <div className={styles.languagesGrid}>
-              {methods.watch('languages').map((_, index) => (
+              {methods.watch("languages").map((_, index) => (
                 <div key={index} className={styles.languageRow}>
                   <FormField
                     control={methods.control}
@@ -256,35 +355,61 @@ export default function ProfileForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={methods.control}
-                    name={`languages.${index}.level`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Level</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {languageLevels.map((level) => (
-                              <SelectItem key={level} value={level}>
-                                {level}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+                  <div className={styles.fieldWithButton}>
+                    <FormField
+                      control={methods.control}
+                      name={`languages.${index}.level`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Level</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {languageLevels.map((level) => (
+                                <SelectItem key={level} value={level}>
+                                  {level}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => {
+                        const currentLanguages = methods.getValues("languages");
+                        if (currentLanguages.length > 1) {
+                          const newLanguages = [...currentLanguages];
+                          newLanguages.splice(index, 1);
+                          methods.setValue("languages", newLanguages);
+                        }
+                      }}
+                      style={{ marginLeft: "8px", marginBottom: 8 }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </div>
                 </div>
               ))}
               <Button
                 type="button"
                 style={{
-                  alignSelf: 'self-end'
+                  alignSelf: "self-end",
                 }}
-                onClick={() => methods.setValue('languages', [...methods.watch('languages'), { language: "", level: "Basic" }])}
+                onClick={() =>
+                  methods.setValue("languages", [
+                    ...methods.watch("languages"),
+                    { language: "", level: "Basic" },
+                  ])
+                }
               >
                 Add Language
               </Button>
@@ -293,7 +418,7 @@ export default function ProfileForm() {
           <div className={styles.section}>
             <h3>Technologies</h3>
             <div className={styles.languagesGrid}>
-              {methods.watch('technologies').map((_, index) => (
+              {methods.watch("technologies").map((_, index) => (
                 <div key={index} className={styles.languageRow}>
                   <FormField
                     control={methods.control}
@@ -307,26 +432,53 @@ export default function ProfileForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={methods.control}
-                    name={`technologies.${index}.yearsOfExperience`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Years of Experience</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Years of Experience" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className={styles.fieldWithButton}>
+                    <FormField
+                      control={methods.control}
+                      name={`technologies.${index}.yearsOfExperience`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Years of Experience</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Years of Experience"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => {
+                        const currentTechnologies =
+                          methods.getValues("technologies");
+                        if (currentTechnologies.length > 1) {
+                          const newTechnologies = [...currentTechnologies];
+                          newTechnologies.splice(index, 1);
+                          methods.setValue("technologies", newTechnologies);
+                        }
+                      }}
+                      style={{ marginLeft: "8px", marginBottom: 8 }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </div>
                 </div>
               ))}
               <Button
                 type="button"
                 style={{
-                  alignSelf: 'self-end'
+                  alignSelf: "self-end",
                 }}
-                onClick={() => methods.setValue('technologies', [...methods.watch('technologies') || [], { name: "", yearsOfExperience: "" }])}
+                onClick={() =>
+                  methods.setValue("technologies", [
+                    ...(methods.watch("technologies") || []),
+                    { name: "", yearsOfExperience: "" },
+                  ])
+                }
               >
                 Add Technology
               </Button>
@@ -387,7 +539,10 @@ export default function ProfileForm() {
                   <FormItem>
                     <FormLabel>CV Portuguese</FormLabel>
                     <FormControl>
-                      <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                      <Input
+                        type="file"
+                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -400,7 +555,10 @@ export default function ProfileForm() {
                   <FormItem>
                     <FormLabel>CV English</FormLabel>
                     <FormControl>
-                      <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                      <Input
+                        type="file"
+                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -418,7 +576,10 @@ export default function ProfileForm() {
                   <FormItem>
                     <FormLabel>Cover Letter Portuguese</FormLabel>
                     <FormControl>
-                      <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                      <Input
+                        type="file"
+                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -431,7 +592,10 @@ export default function ProfileForm() {
                   <FormItem>
                     <FormLabel>Cover Letter English</FormLabel>
                     <FormControl>
-                      <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                      <Input
+                        type="file"
+                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -439,9 +603,13 @@ export default function ProfileForm() {
               />
             </div>
           </div>
-          <div style={{display: 'flex', flexDirection: 'row-reverse'}}><Button size="lg" type="submit">Submit</Button></div>
+          <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+            <Button size="lg" type="submit">
+              Submit
+            </Button>
+          </div>
         </form>
       </FormProvider>
     </div>
-  )
+  );
 }

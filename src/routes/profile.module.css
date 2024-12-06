@@ -55,11 +55,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: flex-end;
 }
 
 .uploadGrid {
   display: flex;
   align-items: flex-end;
+  gap: 20px;
 }
 
 @media (max-width: 640px) {
@@ -89,4 +91,19 @@
   font-size: 0.9rem;
   color: var(--fg-default);
   margin-right: 1rem;
+}
+
+.fieldWithButton {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+@media (max-width: 640px) {
+  .fieldWithButton {
+    flex-direction: row;
+    align-items: flex-end;
+  }
 }
