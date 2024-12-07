@@ -22,6 +22,8 @@ import {
 import styles from "./profile.module.css";
 import { TrashIcon } from "lucide-react";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
+import { useState } from "react";
 
 const languageLevels = ["Basic", "Intermediate", "Advanced", "Native"] as const;
 const softwareLevels = ["Basic", "Intermediate", "Advanced"] as const;
@@ -77,6 +79,9 @@ const formSchema = z.object({
 });
 
 export default function ProfileForm() {
+  const [cookies] = useCookies(["authToken"]);
+  const [loading, setLoading] = useState(false);
+
   const methods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,34 +104,30 @@ export default function ProfileForm() {
   } = methods;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
     try {
       const formData = new FormData();
 
-      if (values.cv1 instanceof File) formData.append("cv1", values.cv1);
-      if (values.cv2 instanceof File) formData.append("cv2", values.cv2);
-      if (values.coverLetter1 instanceof File)
-        formData.append("coverLetter1", values.coverLetter1);
-      if (values.coverLetter2 instanceof File)
-        formData.append("coverLetter2", values.coverLetter2);
+      formData.append("cv1", values.cv1);
+      formData.append("cv2", values.cv2);
+      formData.append("coverLetter1", values.coverLetter1);
+      formData.append("coverLetter2", values.coverLetter2);
 
-      const dataWithoutFiles = {
-        ...values,
-        cv1: values.cv1 instanceof File ? values.cv1.name : null,
-        cv2: values.cv2 instanceof File ? values.cv2.name : null,
-        coverLetter1:
-          values.coverLetter1 instanceof File ? values.coverLetter1.name : null,
-        coverLetter2:
-          values.coverLetter2 instanceof File ? values.coverLetter2.name : null,
-      };
+      const { cv1, cv2, coverLetter1, coverLetter2, ...dataWithoutFiles } =
+        values;
 
-      formData.append("data", JSON.stringify(dataWithoutFiles));
+      formData.append("dataWithoutFiles", JSON.stringify(dataWithoutFiles));
+      const token = cookies.authToken;
+      console.log("token", token);
 
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/create-account`,
         {
           method: "POST",
           body: formData,
-          credentials: "include",
+          headers: {
+            Authorization: token, // Envia apenas o token, sem o prefixo 'Bearer '
+          },
         }
       );
 
@@ -134,12 +135,15 @@ export default function ProfileForm() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
+      // const result = await response.json();
 
       toast("Your profile has been created successfully.", { type: "success" });
+      methods.reset();
     } catch (error) {
       console.error("Submission error:", error);
       toast("Error", { type: "error" });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -604,7 +608,7 @@ export default function ProfileForm() {
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "row-reverse" }}>
-            <Button size="lg" type="submit">
+            <Button size="lg" type="submit" loading={loading}>
               Submit
             </Button>
           </div>

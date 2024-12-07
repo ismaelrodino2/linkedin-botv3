@@ -119,6 +119,7 @@ export default function Login() {
               <div>
                 <Button
                   type="submit"
+                  loading={loading}
                   className="button-class" // Adicione suas classes de estilo
                 >
                   Entrar
