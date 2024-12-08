@@ -1,0 +1,210 @@
+.container {
+  display: flex;
+  height: 100%;
+  min-height: calc(100vh - 70px);
+  padding: 20px;
+  gap: 20px;
+  background-color: #f5f5f5;
+}
+
+.sidebar {
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mainContent {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profileCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.statsCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.reportSection {
+  margin-bottom: 24px;
+}
+
+.periodSelector {
+  display: flex;
+  align-items: center;
+  gap: 68px;
+  margin: 24px 0;
+}
+
+.periodSelector label {
+  font-weight: 500;
+  color: #333;
+}
+
+.periodSelector select {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  min-width: 200px;
+  background-color: white;
+  color: #333;
+}
+
+.periodSelector select:focus {
+  outline: none;
+  border-color: #9333ea;
+  box-shadow: 0 0 0 1px #9333ea;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  font-weight: 500;
+  color: #666;
+}
+
+.headerSection {
+  margin-bottom: 24px;
+}
+
+.loginArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.linkedinButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #9333ea;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.playIcon {
+  font-size: 22px;
+  color: #9113cc;
+}
+
+.remainingCount {
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remainingCount strong {
+  color: #9333ea;
+  font-size: 1.2em;
+}
+
+.statsOverview {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.planInfo {
+  flex: 1;
+}
+
+.applicationStats {
+  display: flex;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.applicationStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.applicationStats span {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.applicationStats strong {
+  color: #333;
+  font-size: 1.2em;
+}
+
+.chartContainer {
+  width: 200px;
+}
+
+.donutChart {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(#9333ea 0% 85%, #e5e7eb 85% 100%);
+}
+
+.chartLegend {
+  margin-top: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+}
+
+.linkedinDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #9333ea;
+}
+
+.indeedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+}
+
+.stopIcon {
+  font-size: 22px;
+  display: flex;
+  color: #9113cc;
+}
+
+.stopIcon svg {
+  fill: #9113cc;
+}
