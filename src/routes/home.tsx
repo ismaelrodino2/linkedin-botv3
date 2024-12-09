@@ -1,12 +1,45 @@
 import { Square } from "lucide-react";
 import { useHome } from "./home-hooks";
 import styles from "./home.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { JobInfo } from "../backend/types";
 
 function Home() {
-  const { handleLogin, handleStopLinkedin } = useHome();
+  const {
+    handleLogin,
+    handleStopLinkedin,
+    handleFetchAccount,
+    handleSubmitLinkedin,
+  } = useHome();
 
   const [isRunning, setIsRunning] = useState(false);
+  const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
+
+  console.log("appliedJobs", appliedJobs);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === "newJob") {
+        console.log("New job applied:", message.data);
+        setAppliedJobs((prev) => [...prev, message.data]);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from WebSocket server");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   const handleLoginClick = async (url: string) => {
     await handleLogin(url);
@@ -41,7 +74,10 @@ function Home() {
           <div className={styles.loginArea}>
             <button
               className={styles.linkedinButton}
-              onClick={() => handleLoginClick("https://www.linkedin.com/login")}
+              onClick={async () => {
+                await handleFetchAccount();
+                await handleLoginClick("https://www.linkedin.com/login");
+              }}
             >
               Login LinkedIn
             </button>
@@ -59,9 +95,7 @@ function Home() {
               </button>
             ) : (
               <button
-                onClick={() =>
-                  handleLoginClick("https://www.linkedin.com/login")
-                }
+                onClick={handleSubmitLinkedin}
                 style={{
                   background: "transparent",
                 }}

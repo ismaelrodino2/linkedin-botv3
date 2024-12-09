@@ -1,6 +1,7 @@
 import express from "express";
 import { json } from "body-parser";
 import cors from "cors";
+import { WebSocket, WebSocketServer } from 'ws';
 import { PORT } from "./constants";
 import { ServerContext } from "./endpoints/types";
 import { handleOpen } from "./endpoints/open";
@@ -11,9 +12,16 @@ import {
   handleLinkedinResume, 
   handleLinkedinStop 
 } from "./endpoints/linkedin-controls";
+import { handleFetchAccount } from "./endpoints/account-handler";
 
 export function callServer() {
   const app = express();
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+  
+  // Create WebSocket server
+  const wss = new WebSocketServer({ server });
   
   const serverContext: ServerContext = {
     pageInstance: null,
@@ -21,8 +29,19 @@ export function callServer() {
     model: null,
     stopApplyingLinkedin: false,
     pauseApplyingLinkedin: false,
-    appliedJobsLinkedin: []
+    appliedJobsLinkedin: [],
+    websocket: null
   };
+
+  wss.on('connection', (ws: WebSocket) => {
+    console.log('Client connected');
+    serverContext.websocket = ws;
+    
+    ws.on('close', () => {
+      console.log('Client disconnected');
+      serverContext.websocket = null;
+    });
+  });
 
   app.use(cors());
   app.use(json());
@@ -39,7 +58,7 @@ export function callServer() {
   app.post("/resume-apply-linkedin", (req, res) => handleLinkedinResume(req, res, serverContext));
   app.post("/stop-apply-linkedin", (req, res) => handleLinkedinStop(req, res, serverContext));
 
-  return app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  app.post("/fetch-account", (req, res) => handleFetchAccount(req, res, serverContext));
+
+  return server;
 }

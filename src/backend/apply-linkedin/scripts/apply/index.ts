@@ -128,14 +128,25 @@ export async function applyJobs({
       }
     }
 
-    addJobToArrayLinkedin({
+    const jobInfo = {
       company: fields.company,
       currentDateTime: new Date(),
       language: language,
       location: fields.location,
       platform: fields.platform,
       position: fields.position,
-    });
+    };
+
+    addJobToArrayLinkedin(jobInfo);
+
+    // Notify frontend about the new job
+    if ((global as any).serverContext?.websocket) {
+      (global as any).serverContext.websocket.send(JSON.stringify({
+        type: 'newJob',
+        data: jobInfo
+      }));
+    }
+
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
