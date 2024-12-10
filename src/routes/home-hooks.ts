@@ -6,7 +6,7 @@ export const useHome = () => {
   const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
 
   const handleLogin = useCallback(async (link: string) => {
-    const url = "http://localhost:3001/navigate";
+    const url = "http://localhost:3001/open";
     const options = {
       method: "POST",
       headers: {

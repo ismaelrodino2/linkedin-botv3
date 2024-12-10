@@ -76,6 +76,12 @@ const formSchema = z.object({
       yearsOfExperience: z.string(),
     })
   ),
+  desiredSalaries: z.array(
+    z.object({
+      country: z.string().min(1, "Country is required"),
+      amount: z.string().min(1, "Salary amount is required"),
+    })
+  ),
 });
 
 export default function ProfileForm() {
@@ -96,6 +102,7 @@ export default function ProfileForm() {
         immediateStart: false,
         canWorkHybrid: false,
       },
+      desiredSalaries: [{ country: "", amount: "" }],
     },
   });
 
@@ -186,6 +193,71 @@ export default function ProfileForm() {
                 </FormItem>
               )}
             />
+          </div>
+          <div className={styles.section}>
+            <h3>Desired Salary</h3>
+            <div className={styles.salaryGrid}>
+              {methods.watch("desiredSalaries").map((_, index) => (
+                <div key={index} className={styles.salaryItem}>
+                  <FormField
+                    control={methods.control}
+                    name={`desiredSalaries.${index}.country`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Country" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={methods.control}
+                    name={`desiredSalaries.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Amount" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      const currentSalaries = methods.getValues("desiredSalaries");
+                      if (currentSalaries.length > 1) {
+                        const newSalaries = [...currentSalaries];
+                        newSalaries.splice(index, 1);
+                        methods.setValue("desiredSalaries", newSalaries);
+                      }
+                    }}
+                    style={{ marginLeft: "8px", marginBottom: 8 }}
+                  >
+                    <TrashIcon />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                style={{
+                  alignSelf: "self-end",
+                }}
+                onClick={() =>
+                  methods.setValue("desiredSalaries", [
+                    ...methods.watch("desiredSalaries"),
+                    { country: "", amount: "" },
+                  ])
+                }
+              >
+                Add Salary
+              </Button>
+            </div>
           </div>
           <div className={styles.section}>
             <FormField

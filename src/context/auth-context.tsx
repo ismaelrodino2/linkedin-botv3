@@ -11,19 +11,43 @@ import { useNavigate } from "react-router-dom";
 import { SignInFormData } from "../routes/login";
 
 // Tipos
-export interface User {
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+interface Account {
+  cv1: string | null;
+  cv2: string | null;
+  coverLetter1: string | null;
+  coverLetter2: string | null;
+  aboutMe: string;
+  experience: string;
+  links: JsonValue;
+  availability: JsonValue;
+  languages: JsonValue;
+  softwares: JsonValue;
+  softSkills: string;
+  hardSkills: string;
+  proficiency: string;
+  technologies: JsonValue;
+  desiredSalaries: JsonValue | null;
   id: number;
+  cv1filePath: string | null;
+  cv2filePath: string | null;
+  coverLetter1filePath: string | null;
+  coverLetter2filePath: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export type UserFromApi = {
-  email: string;
-  password: string;
-  name: string;
+export interface User {
   id: number;
+  name: string;
+  email: string;
   expiration: Date | null;
   paymentDate: Date | null;
   hasPurchased: boolean;
-};
+  accountId: number | null;
+  account: Account | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -39,29 +63,6 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 // Configuração do JWT
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
-
-async function decodeToken(token: string) {
-  try {
-    const response = await fetch(`${SERVER_URL}/decode-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token }),
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const result = await response.json(); // Resultado da decodificação
-    console.log("Token decodificado:", result);
-    return result as { payload: { id: string } };
-  } catch (error) {
-    console.error("Erro ao fazer fetch:", error);
-    return null;
-  }
-}
 
 async function signIn(email: string, password: string) {
   try {
@@ -82,7 +83,7 @@ async function signIn(email: string, password: string) {
       return;
     }
 
-    const result: UserFromApi = (await response.json()).user;
+    const result = (await response.json()).user;
     console.log("Sucesso:", result);
     return result;
   } catch (error) {
@@ -99,24 +100,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Função assíncrona para verificar o token
     const verifyToken = async () => {
       const token = cookies.authToken;
-      console.log("tokenn", token);
       if (token) {
         try {
-          const jwt = await decodeToken(token);
-          console.log("jwtjwt", jwt)
-          setUser(jwt?.payload as unknown as User|null);
+          const response = await fetch(`${SERVER_URL}/get-user-account`, {
+            method: "GET",
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Token inválido');
+          }
+
+          const userData = await response.json();
+          setUser(userData); // Salva os dados do usuário retornados pela API
         } catch (err) {
-          console.error(err);
-          //removeCookieAction("authToken"); // Remover token inválido
+          console.error('Erro ao verificar token:', err);
+          removeCookie("authToken"); // Remove o token se for inválido
+          setUser(null);
         }
       }
     };
 
-    verifyToken(); // Chamar a função assíncrona
-  }, []);
+    verifyToken();
+  }, [cookies.authToken, removeCookie]); // Adicionei as dependências do useEffect
 
   async function generateToken(user: User) {
     const response = await fetch(`${SERVER_URL}/encode-token`, {
