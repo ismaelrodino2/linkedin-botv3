@@ -17,7 +17,7 @@ async function clickDismissButton(page: Page) {
 export async function applyScript(
   page: Page,
   model: GenerativeModel,
-  addJobToArrayLinkedin: (jobs: JobInfo) => void,
+  addJobToArrayLinkedin: (job: JobInfo) => void,
   appliedJobsLinkedin: JobInfo[],
   maxIterations: number,
   stopApplyingLinkedin: boolean,
@@ -44,7 +44,12 @@ export async function applyScript(
     }
     await wait(350);
     if (link) {
-      await applyJobs({ link, model, page, addJobToArrayLinkedin });
+      await applyJobs({
+        page,
+        model,
+        link,
+        addJobToArrayLinkedin
+      });
       await wait(100);
       await clickDismissButton(page);
       await wait(100);

@@ -34,11 +34,25 @@ export function callServer() {
   };
 
   wss.on('connection', (ws: WebSocket) => {
-    console.log('Client connected');
+    console.log('Client connected to WebSocket');
     serverContext.websocket = ws;
     
+    // Enviar jobs existentes quando cliente conectar
+    if (serverContext.appliedJobsLinkedin.length > 0) {
+      serverContext.appliedJobsLinkedin.forEach(job => {
+        ws.send(JSON.stringify({
+          type: "newJob",
+          data: job
+        }));
+      });
+    }
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+    
     ws.on('close', () => {
-      console.log('Client disconnected');
+      console.log('Client disconnected from WebSocket');
       serverContext.websocket = null;
     });
   });

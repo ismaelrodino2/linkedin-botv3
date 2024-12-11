@@ -18,7 +18,7 @@ function Home() {
   console.log("appliedJobs", appliedJobs);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3000");
+    const ws = new WebSocket("ws://localhost:3001");
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -26,6 +26,7 @@ function Home() {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
+      console.log("Received WebSocket message:", message);
       if (message.type === "newJob") {
         console.log("New job applied:", message.data);
         setAppliedJobs((prev) => [...prev, message.data]);
@@ -34,6 +35,10 @@ function Home() {
 
     ws.onclose = () => {
       console.log("Disconnected from WebSocket server");
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
     };
 
     return () => {

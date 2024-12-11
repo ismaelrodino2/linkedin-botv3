@@ -5,6 +5,7 @@ import { applyScript } from "../apply-linkedin/scripts/applyScript";
 import { JobInfo } from "../types";
 import { navigateToNextPage } from "../apply-linkedin/scripts/generate-pagination-links";
 import { MAX_LINKEDIN_APPLICATIONS } from "../constants";
+import { WebSocket } from "ws";
 
 export const handleLinkedinApply = async (
   _req: Request, 
@@ -36,7 +37,17 @@ export const handleLinkedinApply = async (
       await applyScript(
         context.pageInstance,
         context.model,
-        (job: JobInfo) => context.appliedJobsLinkedin.push(job),
+        (job: JobInfo) => {
+          context.appliedJobsLinkedin.push(job);
+          if (context.websocket?.readyState === WebSocket.OPEN) {
+            context.websocket.send(JSON.stringify({
+              type: "newJob",
+              data: job
+            }));
+          } else {
+            console.warn("WebSocket não está conectado");
+          }
+        },
         context.appliedJobsLinkedin,
         maxIterations,
         context.stopApplyingLinkedin,
