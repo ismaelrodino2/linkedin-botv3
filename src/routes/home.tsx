@@ -9,10 +9,10 @@ function Home() {
     handleStopLinkedin,
     handleFetchAccount,
     handleSubmitLinkedin,
-    handleOpenBrowser
+    handleOpenBrowser,
+    isRunning
   } = useHome();
 
-  const [isRunning, setIsRunning] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
 
   console.log("appliedJobs", appliedJobs);
@@ -71,11 +71,7 @@ function Home() {
           <div className={styles.loginArea}>
             <button
               className={styles.linkedinButton}
-              onClick={async () => {
-                //await handleFetchAccount();
-                await handleOpenBrowser();
-                setIsRunning(true);
-              }}
+              onClick={handleOpenBrowser}
             >
               Login LinkedIn
             </button>
@@ -83,9 +79,7 @@ function Home() {
             {isRunning ? (
               <button
                 onClick={handleStopLinkedin}
-                style={{
-                  background: "transparent",
-                }}
+                style={{ background: "transparent" }}
               >
                 <span className={styles.stopIcon}>
                   <Square color="#9113CC" size={22} />
@@ -94,9 +88,7 @@ function Home() {
             ) : (
               <button
                 onClick={handleSubmitLinkedin}
-                style={{
-                  background: "transparent",
-                }}
+                style={{ background: "transparent" }}
               >
                 <span className={styles.playIcon}>▶</span>
               </button>

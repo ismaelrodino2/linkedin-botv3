@@ -1,43 +1,18 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
 import { UserResponse } from "./home-types";
 import { useAuth } from "../context/auth-context";
 
 export const useHome = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
+  const [cookies] = useCookies(["authToken"]);
   const { user } = useAuth();
-
-  // const handleOpenBrowser = useCallback(async () => {
-  //   const savedData = localStorage.getItem("userProfile");
-  //   const defaultValues = savedData
-  //     ? { ...JSON.parse(savedData), startDate: new Date() }
-  //     : {};
-
-  //   const url = "http://localhost:3001/open";
-  //   const options = {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ data: defaultValues }),
-  //   };
-
-  //   try {
-  //     const response = await fetch(url, options);
-  //     const result = await response.text();
-  //     console.log(result);
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // }, []);
+  const [isRunning, setIsRunning] = useState(false);
 
   const handleOpenBrowser = useCallback(async () => {
     if (!user || !user.account) {
-      console.log("user", user)
       console.error("Dados do usuário não disponíveis");
       return;
     }
-
 
     const url = "http://localhost:3001/open";
     const options = {
@@ -45,7 +20,7 @@ export const useHome = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data:user }),
+      body: JSON.stringify({ data: user }),
     };
 
     try {
@@ -55,19 +30,20 @@ export const useHome = () => {
     } catch (error) {
       console.error("Error:", error);
     }
-  }, []);
-
+  }, [user]);
 
   const handleSubmitLinkedin = useCallback(async () => {
     const url = "http://localhost:3001/apply-linkedin";
     const options = { method: "POST" };
 
     try {
+      setIsRunning(true);
       const response = await fetch(url, options);
       const result = await response.text();
       console.log(result);
     } catch (error) {
       console.error("Error:", error);
+      setIsRunning(false);
     }
   }, []);
 
@@ -94,6 +70,8 @@ export const useHome = () => {
       console.log(result);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setIsRunning(false);
     }
   }, []);
 
@@ -156,6 +134,7 @@ export const useHome = () => {
     handleSubmitLinkedin,
     handleSubmitIndeed,
     handleStopLinkedin,
-    handleFetchAccount, // Adiciona a função ao retorno
+    handleFetchAccount,
+    isRunning,
   };
 };
