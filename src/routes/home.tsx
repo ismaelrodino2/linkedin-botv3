@@ -10,7 +10,7 @@ function Home() {
     handleFetchAccount,
     handleSubmitLinkedin,
     handleOpenBrowser,
-    isRunning
+    isRunning,
   } = useHome();
 
   const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
@@ -45,8 +45,6 @@ function Home() {
       ws.close();
     };
   }, []);
-
-
 
   return (
     <div className={styles.container}>
@@ -124,7 +122,7 @@ function Home() {
         <div className={styles.reportSection}>
           <h2>Report</h2>
 
-          <div className={styles.periodSelector}>
+          {/* <div className={styles.periodSelector}>
             <label>Period</label>
             <select>
               <option>Select</option>
@@ -132,30 +130,39 @@ function Home() {
               <option>Last 30 days</option>
               <option>Last 3 months</option>
             </select>
-          </div>
+          </div> */}
 
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Hour</th>
-                <th>Position</th>
-                <th>Company</th>
-                <th>Platform</th>
-                <th>Language</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>05/10/2024</td>
-                <td>11:50</td>
-                <td>UX Master Sênior</td>
-                <td>Autofacts by Raven</td>
-                <td>LinkedIn</td>
-                <td>English</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Position</th>
+                  <th>Company</th>
+                  <th>Location</th>
+                  <th>Platform</th>
+                  <th>Language</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appliedJobs.map((el) => {
+                  return (
+                    <tr>
+                      <td>
+                        {el.currentDateTime &&
+                          new Date(el.currentDateTime).toLocaleString()}
+                      </td>
+                      <td>{el.position}</td>
+                      <td>{el.company}</td>
+                      <td>{el.location}</td>
+                      <td>{el.platform}</td>
+                      <td>{el.language}</td>
+                    </tr>
+                  );
+                })}                
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

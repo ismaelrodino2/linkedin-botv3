@@ -4,7 +4,7 @@ import ModeToggle from "./ui/theme-toggle/theme-toggle";
 
 export const NavBar = () => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", position: 'fixed', width: '100%',
+    <div style={{ display: "flex", flexDirection: "column", width: '100%',
       top: 0 }}>
       <nav className="navbar">
         <Link to="/" className="logo">

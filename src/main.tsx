@@ -18,9 +18,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AuthProvider>
           <NavBar />
-          <div style={{marginTop: 70}}>
-            <App />
-          </div>
+            <div style={{
+              minHeight: 'calc(100vh - 70px)'
+            }}>
+              <App />
+            </div>
           <ToastContainer />
         </AuthProvider>
       </ThemeProvider>
