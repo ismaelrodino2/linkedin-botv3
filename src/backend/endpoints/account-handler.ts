@@ -53,18 +53,29 @@ export async function handleFetchAccount(req: Request, res: Response, serverCont
     // Download and save each file if URL exists
     for (const [filename, url] of Object.entries(filesToProcess)) {
       if (url) {
-        console.log(`Downloading ${filename} from ${url}`);
-        const pdfBuffer = await downloadPdf(url);
-        if (pdfBuffer) {
-          const filePath = path.join(uploadsDir, filename);
-          try {
-            await fs.writeFile(filePath, pdfBuffer, { mode: 0o644 });
-            console.log(`Successfully saved ${filename} to ${filePath}`);
-          } catch (writeError) {
-            console.error(`Error writing file ${filename}:`, writeError);
+        const filePath = path.join(uploadsDir, filename);
+        
+        // Verificar se o arquivo já existe
+        try {
+          const fileExists = await fs.access(filePath)
+            .then(() => true)
+            .catch(() => false);
+          
+          if (fileExists) {
+            console.log(`File ${filename} already exists. Will be replaced.`);
           }
-        } else {
-          console.error(`Failed to download ${filename} from ${url}`);
+          
+          console.log(`Downloading ${filename} from ${url}`);
+          const pdfBuffer = await downloadPdf(url);
+          
+          if (pdfBuffer) {
+            await fs.writeFile(filePath, pdfBuffer, { mode: 0o644 });
+            console.log(`Successfully ${fileExists ? 'replaced' : 'saved'} ${filename} to ${filePath}`);
+          } else {
+            console.error(`Failed to download ${filename} from ${url}`);
+          }
+        } catch (writeError) {
+          console.error(`Error processing file ${filename}:`, writeError);
         }
       }
     }

@@ -138,3 +138,16 @@
   height: 2.5rem;
   width: 2.5rem; 
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.Spinner {
+  animation: spin 1s linear infinite;
+}
