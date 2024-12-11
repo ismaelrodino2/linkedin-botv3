@@ -152,7 +152,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
 
           const userData = await response.json();
-          setUser(userData); // Salva os dados do usuário retornados pela API
+          console.log("userData", userData)
+          setUser(userData.user); // Salva os dados do usuário retornados pela API
         } catch (err) {
           console.error('Erro ao verificar token:', err);
           removeCookie("authToken"); // Remove o token se for inválido
@@ -190,7 +191,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Salve o token no cookie (evite JSON.stringify, já que o token é uma string)
         setCookie("authToken", token);
 
-        setUser(user); // Salva o usuário no estado
+        const response = await fetch(`${SERVER_URL}/get-user-account`, {
+          method: "GET",
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Token inválido');
+        }
+
+        const userData = await response.json();
+
+        setUser(userData.user); // Salva o usuário no estado
         navigate("/");
       }
     } catch (error) {

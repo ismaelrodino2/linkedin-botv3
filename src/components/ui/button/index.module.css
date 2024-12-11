@@ -85,6 +85,10 @@
    background-color: hsl(var(--foreground) / 0.1);
 }
 
+.Mr1 {
+  margin-right: 4px;
+}
+
 .Button[data-variant='link'] {
   color: hsl(var(--foreground)); 
   background-color: transparent;

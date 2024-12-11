@@ -35,7 +35,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading && (
-          <Loader2 className={`${styles.Spinner} h-5 w-5 mr-2`} />
+          <Loader2 className={`${styles.Spinner} ${styles.Mr1}`} />
         )}
         <Slottable>{loading ? "Loading..." : children}</Slottable>
       </Comp>

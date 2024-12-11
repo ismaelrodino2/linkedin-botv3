@@ -7,26 +7,6 @@ export const useHome = () => {
   const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
   const { user } = useAuth();
 
-
-  const handleLogin = useCallback(async (link: string) => {
-    const url = "http://localhost:3001/open";
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: link }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }, []);
-
   // const handleOpenBrowser = useCallback(async () => {
   //   const savedData = localStorage.getItem("userProfile");
   //   const defaultValues = savedData
@@ -53,6 +33,7 @@ export const useHome = () => {
 
   const handleOpenBrowser = useCallback(async () => {
     if (!user || !user.account) {
+      console.log("user", user)
       console.error("Dados do usuário não disponíveis");
       return;
     }
@@ -171,7 +152,6 @@ export const useHome = () => {
   }, [cookies.authToken]);
 
   return {
-    handleLogin,
     handleOpenBrowser,
     handleSubmitLinkedin,
     handleSubmitIndeed,

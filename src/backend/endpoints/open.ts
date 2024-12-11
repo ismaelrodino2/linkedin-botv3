@@ -16,8 +16,22 @@ export const handleOpen = async (
   const profileData: User = req.body.data;
   
   try {
+    // Validar se os dados do perfil existem
+    if (!profileData) {
+      console.error("Profile data is missing");
+      return res.status(400).json({ error: "Profile data is required" });
+    }
+
+    // Log para debug
+    console.log("Received profile data:", profileData);
+
     // Cria o prompt global com os dados do usuário
-    createGlobalPrompt(profileData);
+    try {
+      createGlobalPrompt(profileData);
+    } catch (promptError) {
+      console.error("Error creating global prompt:", promptError);
+      return res.status(500).json({ error: "Failed to create global prompt" });
+    }
 
     // Configura variáveis globais se necessário
     (global as any).globalVars = {
@@ -44,9 +58,12 @@ export const handleOpen = async (
     await context.pageInstance.setViewport({ width, height });
     await context.pageInstance.goto("https://www.linkedin.com/login");
 
-    res.send("Browser launched successfully");
+    //res.send("Browser launched successfully");
   } catch (error) {
     console.error("Error during browser launch:", error);
-    res.status(500).send("Failed to launch browser");
+    res.status(500).json({ 
+      error: "Failed to launch browser",
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 }; 

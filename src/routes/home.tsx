@@ -6,10 +6,10 @@ import { JobInfo } from "../backend/types";
 
 function Home() {
   const {
-    handleLogin,
     handleStopLinkedin,
     handleFetchAccount,
     handleSubmitLinkedin,
+    handleOpenBrowser
   } = useHome();
 
   const [isRunning, setIsRunning] = useState(false);
@@ -41,10 +41,7 @@ function Home() {
     };
   }, []);
 
-  const handleLoginClick = async (url: string) => {
-    await handleLogin(url);
-    setIsRunning(true);
-  };
+
 
   return (
     <div className={styles.container}>
@@ -75,8 +72,9 @@ function Home() {
             <button
               className={styles.linkedinButton}
               onClick={async () => {
-                await handleFetchAccount();
-                await handleLoginClick("https://www.linkedin.com/login");
+                //await handleFetchAccount();
+                await handleOpenBrowser();
+                setIsRunning(true);
               }}
             >
               Login LinkedIn

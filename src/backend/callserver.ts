@@ -49,7 +49,13 @@ export function callServer() {
   // Routes  
   // const upload = configureUpload();
   // app.post("/upload", upload.single("file"), handleUpload);
-  app.post("/open", (req, res) => handleOpen(req, res, serverContext));
+  app.post("/open", (req, res) => {
+    handleOpen(req, res, serverContext).catch((error) => {
+      console.error("Error in handleOpen:", error);
+      res.status(500).json({ error: "Internal server error" });
+    });
+  });
+
   app.post("/navigate", (req, res) => handleNavigate(req, res, serverContext));
   
   // LinkedIn routes
