@@ -4,39 +4,20 @@ import { launch, executablePath } from "puppeteer";
 import { createGlobalPrompt } from "../prompt";
 import { ServerContext } from "./types";
 import { USER_DATA_DIR } from "../constants";
+import { User } from "../../context/auth-context";
 
-// Interface para os dados que virão do frontend
-interface ProfileData {
-  name: string;
-  role: string;
-  location: string;
-  email: string;
-  linkedin: string;
-  portfolio: string;
-  summary: string;
-  experiences: string;
-  languages: any;
-  availability: any;
-  desiredSalary: any;
-  address: string;
-  softSkills: string;
-  hardSkills: string;
-  technologies: any;
-}
+
 
 export const handleOpen = async (
   req: Request, 
   res: Response, 
   context: ServerContext
 ) => {
-  const profileData: ProfileData = req.body.data;
+  const profileData: User = req.body.data;
   
   try {
     // Cria o prompt global com os dados do usuário
-    createGlobalPrompt({ 
-      ...profileData,
-      startDate: new Date() 
-    });
+    createGlobalPrompt(profileData);
 
     // Configura variáveis globais se necessário
     (global as any).globalVars = {

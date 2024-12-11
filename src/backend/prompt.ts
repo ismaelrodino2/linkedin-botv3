@@ -1,51 +1,95 @@
-// const today = new Date();
+import { User } from "../context/auth-context";
 
-// const generalInfo = `Gabriel Cunha | UI/UX & Mobile Designer | Rio de Janeiro, Brazil | Email: designbycunha@gmail.com | LinkedIn: www.linkedin.com/in/cunha2c | Portfolio: www.behance.net/gabrielcunha5 | Summary: Dedicated UI/UX designer with a passion for learning and overcoming challenges. Experienced with Figma, and committed to working in leading teams. | Experience: UI Designer, i2 Capital (May–Aug 2024): Led design projects, UX research, prototypes. | Social Media Manager, Torie Propaganda (Jan 2024–Present): Managed content creation and social media strategy. | UI/UX Designer, Curiba (Jan 2023–Mar 2024): Specialized in design systems, color theory, typography. | Freelance (Nov 2023–Jan 2024): E-commerce project development. | Social Media Manager, beofficesbrasil (May–Dec 2021): Digital marketing and social media strategies. | Languages: English, Spanish, Portuguese. Available immediately. Desired salary: 40,000 USD. Earliest start date: ${today}. Location: Rua Álvaro Proença, Parque São Nicolau.`;
-
-// export const globalPrompt = `You are a highly experienced UI/UX and Mobile Designer named Gabriel Cunha. Your role is to fill out job application forms using the information provided below. Respond confidently as if you were Gabriel, using your expertise in UI/UX to frame answers. Keep responses relevant to your profile and concise. If any details are missing, create plausible responses that align with Gabriel's professional background. The date is ${today}. Here is Gabriel's personal and professional information:
-// ${generalInfo}
-// Your goal is to present Gabriel as an ideal candidate for design roles. Always provide an appropriate response, avoid leaving blanks, and do not ask for more information. If necessary, invent details to fill gaps.`;
-
-// Função para criar o globalPrompt
-// Função para criar o globalPrompt
-export function createGlobalPrompt({
-  name,
-  role,
-  location,
-  email,
-  linkedin,
-  portfolio,
-  summary,
-  experiences,
-  languages,
-  availability,
-  desiredSalary,
-  startDate,
-  address,
-}: {
-  name: string;
-  role: string;
-  location: string;
-  email: string;
-  linkedin: string;
-  portfolio: string;
-  summary: string;
-  experiences: string;
-  languages: string;
-  availability: string;
-  desiredSalary: string;
-  startDate: Date | string;
-  address: string;
-}) {
+export function createGlobalPrompt({ name, account, email }: User) {
   const today = new Date();
+  if (!account) return new Error("No account found");
 
-  const generalInfo = `${name} | ${role} | ${location} | Email: ${email} | LinkedIn: ${linkedin} | Portfolio: ${portfolio} | Summary: ${summary} | Experience: ${experiences} | Languages: ${languages}. Available: ${availability}. Desired salary: ${desiredSalary}. Earliest start date: ${startDate}. Location: ${address}.`;
+  const {
+    aboutMe,
+    availability,
+    experience,
+    hardSkills,
+    languages,
+    links,
+    proficiency,
+    softSkills,
+    technologies,
+    desiredSalaries,
+  } = account;
 
-  const globalPrompt = `You are a highly experienced ${role} named ${name}. Your role is to fill out job application forms using the information provided below. Respond confidently as if you were ${name}, using your expertise in ${role
-    .split("&")[0]
-    .trim()} to frame answers. Keep responses relevant to your profile and concise. If any details are missing, create plausible responses that align with ${name}'s professional background. The date is ${today}. Here is ${name}'s personal and professional information:
+  // Formata os links em uma string legível
+  const formattedLinks = links
+    .map((link) => `${link.name}: ${link.url}`)
+    .join(" | ");
+
+  // Formata as linguagens em uma string legível
+  const formattedLanguages = languages
+    .map((lang) => `${lang.language} (${lang.level})`)
+    .join(", ");
+
+  // Formata as tecnologias em uma string legível
+  const formattedTechnologies = technologies
+    .map((tech) => `${tech.name} (${tech.yearsOfExperience} years)`)
+    .join(", ");
+
+  // Formata a disponibilidade em uma string legível
+  const formattedAvailability = [
+    availability.canTravel && "Available to travel",
+    availability.canWorkInPerson && "Can work in person",
+    availability.canWorkHybrid && "Available for hybrid work",
+    availability.immediateStart && "Available for immediate start",
+    availability.needsSponsor && "Needs visa sponsorship",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  // Formata os salários desejados em uma string legível
+  const formattedSalaries =
+    desiredSalaries
+      ?.map((salary) => `${salary.country}: ${salary.amount}`)
+      .join(", ") || "Negotiable";
+
+  const generalInfo = `
+Professional Profile:
+Name: ${name}
+Role: ${proficiency}
+Email: ${email}
+
+About Me:
+${aboutMe}
+
+Professional Experience:
+${experience}
+
+Technical Skills:
+Hard Skills: ${hardSkills}
+Technologies: ${formattedTechnologies}
+Soft Skills: ${softSkills}
+
+Languages: ${formattedLanguages}
+
+Availability: ${formattedAvailability}
+Desired Salary: ${formattedSalaries}
+
+Professional Links:
+${formattedLinks}
+`.trim();
+
+  const globalPrompt = `You are acting as ${name}, a ${proficiency}. Your role is to fill out job application forms and respond to job-related questions using the information provided below. 
+
+Here is your professional profile:
+
 ${generalInfo}
-Your goal is to present ${name} as an ideal candidate for design roles. Always provide an appropriate response, avoid leaving blanks, and do not ask for more information. If necessary, invent details to fill gaps.`;
+
+Instructions:
+1. Respond as if you are ${name}, using first-person perspective
+2. Keep responses professional, relevant, and concise
+3. Use the provided experience and skills to frame your answers
+4. If specific details are needed but not provided, create reasonable responses that align with the overall profile
+5. Maintain consistency with the professional background provided
+6. The current date is ${today.toLocaleDateString()}
+
+Your goal is to present yourself (${name}) as an ideal candidate for ${proficiency} roles. Always provide appropriate responses that highlight your relevant experience and skills. If necessary, elaborate on the provided information while staying consistent with your professional background.`;
 
   // Armazenar o prompt globalmente
   (global as any).globalPrompt = globalPrompt;
@@ -53,15 +97,9 @@ Your goal is to present ${name} as an ideal candidate for design roles. Always p
   return globalPrompt;
 }
 
-
-// Função para alterar a língua do prompt
 export function setPromptLanguage(language: string) {
-  // Recupera o prompt global e adiciona a especificação do idioma
-  const basePrompt = (global as any).globalPrompt || '';
-  const updatedPrompt = `${basePrompt}\nGenerate answers in ${language}.`;
-
-  // Atualiza o prompt global com a nova especificação de idioma
+  const basePrompt = (global as any).globalPrompt || "";
+  const updatedPrompt = `${basePrompt}\nPlease generate all responses in ${language}.`;
   (global as any).globalPrompt = updatedPrompt;
-
   return updatedPrompt;
 }

@@ -11,7 +11,42 @@ import { useNavigate } from "react-router-dom";
 import { SignInFormData } from "../routes/login";
 
 // Tipos
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+type LanguageLevel = "Basic" | "Intermediate" | "Advanced" | "Native";
+type SoftwareLevel = "Basic" | "Intermediate" | "Advanced";
+
+interface Link {
+  name: string;
+  url: string;
+}
+
+interface Language {
+  language: string;
+  level: LanguageLevel;
+}
+
+interface Software {
+  name: string;
+  yearsOfExperience: string;
+  level: SoftwareLevel;
+}
+
+interface Technology {
+  name: string;
+  yearsOfExperience: string;
+}
+
+interface Availability {
+  canTravel: boolean;
+  canWorkInPerson: boolean;
+  needsSponsor: boolean;
+  immediateStart: boolean;
+  canWorkHybrid: boolean;
+}
+
+interface DesiredSalary {
+  country: string;
+  amount: string;
+}
 
 interface Account {
   cv1: string | null;
@@ -20,15 +55,15 @@ interface Account {
   coverLetter2: string | null;
   aboutMe: string;
   experience: string;
-  links: JsonValue;
-  availability: JsonValue;
-  languages: JsonValue;
-  softwares: JsonValue;
+  links: Link[];
+  availability: Availability;
+  languages: Language[];
+  softwares: Software[];
   softSkills: string;
   hardSkills: string;
   proficiency: string;
-  technologies: JsonValue;
-  desiredSalaries: JsonValue | null;
+  technologies: Technology[];
+  desiredSalaries: DesiredSalary[] | null;
   id: number;
   cv1filePath: string | null;
   cv2filePath: string | null;
