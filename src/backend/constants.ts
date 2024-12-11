@@ -10,4 +10,6 @@ export const USER_DATA_DIR = process.env.NODE_ENV !== "dev"
   : path.resolve(__dirname, "./userDataDir");
 
 export const BASE_DIRECTORY = path.join(__dirname, "../../");
-export const UPLOADS_DIR = path.join(BASE_DIRECTORY, "uploads"); 
+export const UPLOADS_DIR = path.join(BASE_DIRECTORY, "uploads");
+
+export const MAX_LINKEDIN_APPLICATIONS = 25;

@@ -59,10 +59,38 @@ export function callServer() {
   app.post("/navigate", (req, res) => handleNavigate(req, res, serverContext));
   
   // LinkedIn routes
-  app.post("/apply-linkedin", (req, res) => handleLinkedinApply(req, res, serverContext));
-  app.post("/pause-apply-linkedin", (req, res) => handleLinkedinPause(req, res, serverContext));
-  app.post("/resume-apply-linkedin", (req, res) => handleLinkedinResume(req, res, serverContext));
-  app.post("/stop-apply-linkedin", (req, res) => handleLinkedinStop(req, res, serverContext));
+  app.post("/apply-linkedin", async (req, res) => {
+    try {
+      await handleLinkedinApply(req, res, serverContext);
+    } catch (error) {
+      console.error("Error in handleLinkedinApply:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  app.post("/pause-apply-linkedin", async (req, res) => {
+    try {
+      await handleLinkedinPause(req, res, serverContext);
+    } catch (error) {
+      console.error("Error in handleLinkedinPause:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  app.post("/resume-apply-linkedin", async (req, res) => {
+    try {
+      await handleLinkedinResume(req, res, serverContext);
+    } catch (error) {
+      console.error("Error in handleLinkedinResume:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  app.post("/stop-apply-linkedin", async (req, res) => {
+    try {
+      await handleLinkedinStop(req, res, serverContext);
+    } catch (error) {
+      console.error("Error in handleLinkedinStop:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   app.post("/fetch-account", (req, res) => handleFetchAccount(req, res, serverContext));
 

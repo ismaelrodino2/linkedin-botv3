@@ -4,6 +4,7 @@ import { scrollToBottomAndBackSmoothly, sleep } from "../utils";
 import { applyScript } from "../apply-linkedin/scripts/applyScript";
 import { JobInfo } from "../types";
 import { navigateToNextPage } from "../apply-linkedin/scripts/generate-pagination-links";
+import { MAX_LINKEDIN_APPLICATIONS } from "../constants";
 
 export const handleLinkedinApply = async (
   _req: Request, 
@@ -11,15 +12,21 @@ export const handleLinkedinApply = async (
   context: ServerContext
 ) => {
   context.stopApplyingLinkedin = false;
-  const maxIterations = (global as any).globalVars.maxApplications;
+  const maxIterations = MAX_LINKEDIN_APPLICATIONS;
+
+  console.log("maxIterations:", maxIterations);
+
+  if (!context.pageInstance) {
+    return res.status(400).json({ 
+      error: "Browser page not initialized. Please open LinkedIn first." 
+    });
+  }
 
   while (
     context.appliedJobsLinkedin.length < maxIterations && 
     !context.stopApplyingLinkedin
   ) {
     try {
-      if (!context.pageInstance) throw new Error("Browser not initialized");
-      
       await scrollToBottomAndBackSmoothly(
         context.pageInstance,
         ".scaffold-layout__list  > div"
@@ -45,7 +52,6 @@ export const handleLinkedinApply = async (
   }
 
   res.send("Application process completed");
-  if (context.pageInstance) await context.pageInstance.close();
 };
 
 export const handleLinkedinPause = (_req: Request, res: Response, context: ServerContext) => {
