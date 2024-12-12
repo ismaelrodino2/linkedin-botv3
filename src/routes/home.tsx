@@ -1,57 +1,22 @@
 import { Square } from "lucide-react";
-import { useHome } from "./home-hooks";
+import { useHome } from "./home-hooks/home-hooks";
 import styles from "./home.module.css";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { JobInfo } from "../backend/types";
 import { useAuth } from "../context/auth-context";
+import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
+import { useJobContext } from "../context/job-context";
 
 function Home() {
-  const {
-    handleStopLinkedin,
-    handleSubmitLinkedin,
-    handleOpenBrowser,
-    isRunning,
-  } = useHome();
+  const [isRunning, setIsRunning] = useState(false);
+
+  const { handleSubmitLinkedin, handleOpenBrowser } = useHome({ setIsRunning });
+  const { handleStopLinkedin } = useStopLinkedin({ setIsRunning });
 
   const { user } = useAuth();
-  const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
+  const {appliedJobs} = useJobContext()
 
-  const remainingApplications = 0
-
-  useEffect(() => {
-    // Recupera o dailyUsage do localStorage ao montar o componente
-    const savedDailyUsage = localStorage.getItem("dailyUsage");
-    if (savedDailyUsage && user) {
-      user.dailyUsage = parseInt(savedDailyUsage);
-    }
-
-    const ws = new WebSocket("ws://localhost:3001");
-
-    ws.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log("Received WebSocket message:", message);
-      if (message.type === "newJob") {
-        console.log("New job applied:", message.data);
-        setAppliedJobs((prev) => [...prev, message.data]);
-      }
-    };
-
-    ws.onclose = () => {
-      console.log("Disconnected from WebSocket server");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
+  const remainingApplications = 0;
 
   const handleStartApplying = async () => {
     if (!user) return;

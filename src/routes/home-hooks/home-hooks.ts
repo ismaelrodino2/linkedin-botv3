@@ -1,13 +1,15 @@
 import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
-import { UserResponse } from "./home-types";
-import { useAuth } from "../context/auth-context";
-import { stopService } from "../services/stop-service";
+import { UserResponse } from "../home-types";
+import { useAuth } from "../../context/auth-context";
 
-export const useHome = () => {
+export const useHome = ({
+  setIsRunning,
+}: {
+  setIsRunning: (value: boolean) => void;
+}) => {
   const [cookies] = useCookies(["authToken"]);
   const { user } = useAuth();
-  const [isRunning, setIsRunning] = useState(false);
 
   const handleOpenBrowser = useCallback(async () => {
     if (!user || !user.account) {
@@ -35,12 +37,12 @@ export const useHome = () => {
 
   const handleSubmitLinkedin = useCallback(async () => {
     const url = "http://localhost:3001/apply-linkedin";
-    const options = { 
+    const options = {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user })
+      body: JSON.stringify({ user }),
     };
 
     try {
@@ -48,11 +50,11 @@ export const useHome = () => {
       const response = await fetch(url, options);
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to start LinkedIn application');
+        throw new Error(error.error || "Failed to start LinkedIn application");
       }
       const result = await response.text();
       console.log(result);
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error:", error);
       alert(error.message);
       setIsRunning(false);
@@ -71,43 +73,6 @@ export const useHome = () => {
       console.error("Error:", error);
     }
   }, []);
-
-  const handleStopLinkedin = useCallback(async () => {
-
-    try {
-      // Envia o comando de parada
-      await stopService()
-
-      // Atualiza o usuário na API com o novo dailyUsage
-      // const savedDailyUsage = localStorage.getItem('dailyUsage');
-      // if (savedDailyUsage && user) {
-      //   const updateUserUrl = `${import.meta.env.VITE_SERVER_URL}/update-user`;
-      //   const updateResponse = await fetch(updateUserUrl, {
-      //     method: 'PUT',
-      //     headers: {
-      //       'Authorization': cookies.authToken,
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       dailyUsage: parseInt(savedDailyUsage),
-      //       lastUsage: new Date().toISOString()
-      //     })
-      //   });
-
-      //   if (!updateResponse.ok) {
-      //     throw new Error('Failed to update user data');
-      //   }
-
-      //   // Limpar o contador local após atualizar a API
-      //   localStorage.removeItem('dailyUsage');
-      // }
-    } catch (error) {
-      console.error("Error:", error);
-      // toast.error("Failed to stop the process. Please try again.");
-    } finally {
-      setIsRunning(false);
-    }
-  }, [cookies.authToken, user]);
 
   // Nova função para buscar a conta do usuário usando o JWT do localStorage
   const handleFetchAccount = useCallback(async () => {
@@ -137,7 +102,7 @@ export const useHome = () => {
       console.log("Conta do usuário:", data);
 
       // Nova chamada para processar os arquivos localmente
-      const localUrl = 'http://localhost:3001/fetch-account';
+      const localUrl = "http://localhost:3001/fetch-account";
       const uploadOptions = {
         method: "POST",
         headers: {
@@ -147,17 +112,16 @@ export const useHome = () => {
           cv1: data.user.account.cv1,
           cv2: data.user.account.cv2,
           cl1: data.user.account.coverLetter1,
-          cl2: data.user.account.coverLetter2
-        })
+          cl2: data.user.account.coverLetter2,
+        }),
       };
 
       const uploadResponse = await fetch(localUrl, uploadOptions);
       if (!uploadResponse.ok) {
-        throw new Error('Falha ao processar os arquivos');
+        throw new Error("Falha ao processar os arquivos");
       }
 
       return data;
-
     } catch (error) {
       console.error("Erro:", error);
     }
@@ -167,8 +131,6 @@ export const useHome = () => {
     handleOpenBrowser,
     handleSubmitLinkedin,
     handleSubmitIndeed,
-    handleStopLinkedin,
     handleFetchAccount,
-    isRunning,
   };
 };

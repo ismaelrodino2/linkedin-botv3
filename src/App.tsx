@@ -6,12 +6,12 @@ import "./styles/App.css";
 import PrivateRoutes from "./components/private-routes";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/auth-context";
-import { SyncProvider } from "./context/sync-context";
+import { JobProvider } from "./context/job-context";
 
 function App() {
   return (
     <AuthProvider>
-      <SyncProvider>
+      <JobProvider>
         <Routes>
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<Home />} />
@@ -22,7 +22,7 @@ function App() {
           </Route>
         </Routes>
         <ToastContainer />
-      </SyncProvider>
+      </JobProvider>
     </AuthProvider>
   );
 }

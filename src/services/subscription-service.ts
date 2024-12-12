@@ -7,4 +7,6 @@ const FREE_DAILY_LIMIT = 10;
 const FREE_TOTAL_DAYS = 4;
 
 
-
+export function sincronizeAfterClose(){
+  
+}
