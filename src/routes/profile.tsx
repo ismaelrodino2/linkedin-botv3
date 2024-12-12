@@ -23,7 +23,8 @@ import styles from "./profile.module.css";
 import { TrashIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/auth-context";
 
 const languageLevels = ["Basic", "Intermediate", "Advanced", "Native"] as const;
 const softwareLevels = ["Basic", "Intermediate", "Advanced"] as const;
@@ -84,27 +85,93 @@ const formSchema = z.object({
   ),
 });
 
+const FileDisplay = ({ url, label }: { url: string | null, label: string }) => {
+  if (!url) return null;
+  
+  return (
+    <div className={styles.fileDisplay}>
+      <span>{label}:</span>
+      <a 
+        href={url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className={styles.fileLink}
+      >
+        View current file
+      </a>
+    </div>
+  );
+};
+
 export default function ProfileForm() {
   const [cookies] = useCookies(["authToken"]);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const methods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      languages: [{ language: "", level: "Basic" }],
-      softwares: [{ name: "", yearsOfExperience: "", level: "Basic" }],
-      technologies: [{ name: "", yearsOfExperience: "" }],
-      links: [{ name: "", url: "" }],
-      availability: {
+      aboutMe: user?.account?.aboutMe || "",
+      experience: user?.account?.experience || "",
+      links: user?.account?.links || [{ name: "", url: "" }],
+      availability: user?.account?.availability || {
         canTravel: false,
         canWorkInPerson: false,
         needsSponsor: false,
         immediateStart: false,
         canWorkHybrid: false,
       },
-      desiredSalaries: [{ country: "", amount: "" }],
+      languages: user?.account?.languages || [{ language: "", level: "Basic" }],
+      softwares: user?.account?.softwares || [{ 
+        name: "", 
+        yearsOfExperience: "", 
+        level: "Basic" 
+      }],
+      technologies: user?.account?.technologies || [{ 
+        name: "", 
+        yearsOfExperience: "" 
+      }],
+      softSkills: user?.account?.softSkills || "",
+      hardSkills: user?.account?.hardSkills || "",
+      proficiency: user?.account?.proficiency || "",
+      cv1: undefined,
+      cv2: undefined,
+      coverLetter1: undefined,
+      coverLetter2: undefined,
+      desiredSalaries: user?.account?.desiredSalaries ?? [{ 
+        country: "", 
+        amount: "" 
+      }],
     },
   });
+
+  useEffect(() => {
+    if (user?.account) {
+      methods.reset({
+        aboutMe: user.account.aboutMe,
+        experience: user.account.experience,
+        links: user.account.links,
+        availability: user.account.availability,
+        languages: user.account.languages,
+        softwares: user.account.softwares,
+        technologies: user.account.technologies,
+        softSkills: user.account.softSkills,
+        hardSkills: user.account.hardSkills,
+        proficiency: user.account.proficiency,
+        desiredSalaries: user.account.desiredSalaries ?? [{ 
+          country: "", 
+          amount: "" 
+        }],
+      });
+    }
+  }, [user, methods]);
+
+  const existingFiles = {
+    cv1: user?.account?.cv1,
+    cv2: user?.account?.cv2,
+    coverLetter1: user?.account?.coverLetter1,
+    coverLetter2: user?.account?.coverLetter2,
+  };
 
   const {
     formState: { errors },
@@ -614,6 +681,10 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CV Portuguese</FormLabel>
+                    <FileDisplay 
+                      url={existingFiles.cv1 ?? null} 
+                      label="Current CV"
+                    />
                     <FormControl>
                       <Input
                         type="file"
@@ -630,6 +701,10 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CV English</FormLabel>
+                    <FileDisplay 
+                      url={existingFiles.cv2 ?? null} 
+                      label="Current CV"
+                    />
                     <FormControl>
                       <Input
                         type="file"
@@ -651,6 +726,10 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cover Letter Portuguese</FormLabel>
+                    <FileDisplay 
+                      url={existingFiles.coverLetter1 ?? null}
+                      label="Current Cover Letter"
+                    />
                     <FormControl>
                       <Input
                         type="file"
@@ -667,6 +746,10 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cover Letter English</FormLabel>
+                    <FileDisplay 
+                      url={existingFiles.coverLetter2 ?? null} 
+                      label="Current Cover Letter"
+                    />
                     <FormControl>
                       <Input
                         type="file"

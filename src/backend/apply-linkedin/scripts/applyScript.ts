@@ -1,8 +1,10 @@
 import { GenerativeModel } from "@google/generative-ai";
 import { generateLinks, wait } from "./generate-links";
 import { applyJobs } from "./apply";
-import { Page } from "puppeteer";
+import { Browser, Page } from "puppeteer";
 import { JobInfo } from "../../types";
+import { getStopProcessing } from "./stop";
+import { Response } from "express";
 
 async function clickDismissButton(page: Page) {
   try {
@@ -14,16 +16,15 @@ async function clickDismissButton(page: Page) {
 }
 
 export async function applyScript(
+  res: Response,
   page: Page,
   model: GenerativeModel,
   addJobToArrayLinkedin: (job: JobInfo) => void,
   appliedJobsLinkedin: JobInfo[],
   remainingApplications: number,
-  stopApplyingLinkedin: boolean,
-  pauseApplyingLinkedin: boolean
+  browser: Browser | null
 ) {
   let validLinks = await generateLinks(page);
-
   console.log("validLinks", validLinks, validLinks.length);
 
   if (validLinks.length === 0) {
@@ -32,27 +33,30 @@ export async function applyScript(
   }
 
   for (const link of validLinks) {
+    if (getStopProcessing()) {
+      res.status(200).send("Processamento interrompido.");
+      await browser?.close();
+      return;
+    }
+
     if (appliedJobsLinkedin.length >= remainingApplications) {
       console.log("Daily application limit reached");
-      break;
-    }
-
-    while (pauseApplyingLinkedin) {
-      console.log("Processo pausado...");
-      await wait(500);
-    }
-
-    if (stopApplyingLinkedin) {
-      break;
+      res.status(200).send("Processamento interrompido.");
+      await browser?.close();
+      return;
     }
 
     await wait(350);
     if (link) {
       await applyJobs({
+        res,
         page,
         model,
         link,
-        addJobToArrayLinkedin
+        addJobToArrayLinkedin,
+        browser,
+        appliedJobsLinkedin: appliedJobsLinkedin.length,
+        remainingApplications
       });
       await wait(100);
       await clickDismissButton(page);

@@ -4,10 +4,12 @@ import { GenerativeModel } from "@google/generative-ai";
 import { wait } from "../generate-links";
 import { checkProgressBar } from "../../check-progress-bar";
 import { selectors } from "../../selectors";
-import { Page } from "puppeteer";
+import { Browser, Page } from "puppeteer";
 import LanguageDetect from "languagedetect";
 import { JobInfo } from "../../../types";
 import { sleep } from "../../../utils";
+import { getStopProcessing } from "../stop";
+import { Response } from "express";
 
 const noop = () => {};
 
@@ -44,22 +46,46 @@ export interface ApplicationFormData {
 }
 
 interface Params {
+  res: Response;
   page: Page;
-  link: string;
   model: GenerativeModel;
-  addJobToArrayLinkedin: (el: JobInfo) => void;
+  link: string;
+  addJobToArrayLinkedin: (job: JobInfo) => void;
+  browser: Browser | null;
+  appliedJobsLinkedin: number
+  remainingApplications: number
 }
 
 export async function applyJobs({
+  res,
   page,
   model,
   link,
   addJobToArrayLinkedin,
+  browser,
+  appliedJobsLinkedin,
+  remainingApplications
 }: Params) {
   let bar1 = 0;
   let bar2 = 0;
 
+  
+  if (appliedJobsLinkedin >= remainingApplications) {
+    console.log("Daily application limit reached");
+    res.status(200).send("Processamento interrompido.");
+    await browser?.close();
+    return;
+  }
+
   await page.goto(link, { waitUntil: "load", timeout: 30000 });
+
+  // Verifica se devemos parar após navegar para a página
+  if (getStopProcessing()) {
+    res.status(200).send("Processamento interrompido.");
+    await browser?.close()
+
+    return;
+  }
 
   const lngDetector = new LanguageDetect();
 
@@ -104,6 +130,14 @@ export async function applyJobs({
     let maxPages = 7;
     // let maxTries = 2;
     while (maxPages--) {
+      // Verifica se devemos parar durante o preenchimento
+      if (getStopProcessing()) {
+        res.status(200).send("Processamento interrompido.");
+        await browser?.close()
+
+        return;
+      }
+
       await wait(200);
       await fillFields(page, model, language).catch(noop);
 

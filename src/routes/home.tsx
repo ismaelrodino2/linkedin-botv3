@@ -1,10 +1,10 @@
 import { Square } from "lucide-react";
 import { useHome } from "./home-hooks";
 import styles from "./home.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { JobInfo } from "../backend/types";
 import { useAuth } from "../context/auth-context";
-import { SubscriptionService } from '../services/subscription-service';
+import { checkSubscriptionStatus } from "../services/subscription-service";
 
 function Home() {
   const {
@@ -16,6 +16,18 @@ function Home() {
 
   const { user } = useAuth();
   const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
+
+  // Calcula os limites baseados no plano do usuário
+  const subscriptionStatus = useMemo(() => {
+    if (!user) return null;
+    return checkSubscriptionStatus(user);
+  }, [user]);
+
+  // Calcula o número de aplicações restantes
+  const remainingApplications = useMemo(() => {
+    if (!subscriptionStatus) return 0;
+    return subscriptionStatus.dailyLimit - (user?.dailyUsage || 0);
+  }, [subscriptionStatus, user?.dailyUsage]);
 
   // Efeito para atualizar o localStorage quando appliedJobs mudar
   useEffect(() => {
@@ -63,7 +75,7 @@ function Home() {
   const handleStartApplying = async () => {
     if (!user) return;
 
-    const subscriptionStatus = SubscriptionService.checkSubscriptionStatus(user);
+    const subscriptionStatus = checkSubscriptionStatus(user);
     
     if (!subscriptionStatus.canApply) {
       alert(subscriptionStatus.reason || 'You cannot apply at this moment');
@@ -79,19 +91,19 @@ function Home() {
       {/* Coluna da esquerda (sidebar) */}
       <div className={styles.sidebar}>
         <div className={styles.profileCard}>
-          <h3>Diana Rodini</h3>
+          <h3>{user?.name}</h3>
           <p>Product Designer • UX/UI • AI Enthusiast</p>
           <p>Based in Rio de Janeiro • Brasil</p>
         </div>
 
         <div className={styles.statsCard}>
           <div>
-            <h4>Application sent</h4>
-            <p>580</p>
+            <h4>Applications sent</h4>
+            <p>{user?.dailyUsage || 0}</p>
           </div>
           <div>
             <h4>Remaining applications</h4>
-            <p>20</p>
+            <p>{remainingApplications}</p>
           </div>
         </div>
       </div>
@@ -121,7 +133,7 @@ function Home() {
 
             <span className={styles.remainingCount}>
               Remaining
-              <strong>540</strong>
+              <strong>{remainingApplications}</strong>
             </span>
           </div>
 
@@ -129,12 +141,12 @@ function Home() {
             <div className={styles.planInfo}>
               <div className={styles.applicationStats}>
                 <div>
-                  <span>Application sent</span>
-                  <strong>580</strong>
+                  <span>Applications sent</span>
+                  <strong>{user?.dailyUsage || 0}</strong>
                 </div>
                 <div>
                   <span>Remaining applications</span>
-                  <strong>20</strong>
+                  <strong>{remainingApplications}</strong>
                 </div>
               </div>
             </div>

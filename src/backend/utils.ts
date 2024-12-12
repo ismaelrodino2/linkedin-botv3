@@ -1,4 +1,6 @@
-import { Page } from "puppeteer";
+import { Browser, Page } from "puppeteer";
+import { getStopProcessing } from "./apply-linkedin/scripts/stop";
+import { Response } from "express";
 
 export const sleep = (baseMs: number) => {
   const randomDelay = Math.random() * 296 - 148;
@@ -8,7 +10,9 @@ export const sleep = (baseMs: number) => {
 
 export async function scrollToBottomAndBackSmoothly(
   page: Page,
-  containerSelector: string
+  containerSelector: string,
+  browser: Browser | null,
+  res: Response
 ) {
   const scrollStep = 100;
   const scrollDelay = 50;
@@ -17,6 +21,11 @@ export async function scrollToBottomAndBackSmoothly(
     let previousScrollTop = 0;
 
     while (true) {
+      if (getStopProcessing()) {
+        res.status(200).send('Processamento interrompido.');
+        await browser?.close()
+        return;
+      }
       const currentScrollTop = await page.evaluate(
         (containerSelector, scrollStep, direction) => {
           const container = document.querySelector(containerSelector);

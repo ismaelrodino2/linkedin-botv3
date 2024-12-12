@@ -1,163 +1,167 @@
-import { User } from "../types/user";
+// import { User } from "../types/user";
 
-interface SubscriptionLimits {
-  dailyLimit: number;
-  daysRemaining: number | null;
-  canApply: boolean;
-  reason?: string;
-}
+// // Constantes
+// const PREMIUM_DAILY_LIMIT = 80;
+// const FREE_DAILY_LIMIT = 10;
+// const FREE_TOTAL_DAYS = 4;
 
-export class SubscriptionService {
-  private static PREMIUM_DAILY_LIMIT = 80;
-  private static FREE_DAILY_LIMIT = 10;
-  private static FREE_TOTAL_DAYS = 4;
+// interface SubscriptionLimits {
+//   dailyLimit: number;
+//   daysRemaining: number | null;
+//   canApply: boolean;
+//   reason?: string;
+// }
 
-  static checkSubscriptionStatus(user: User): SubscriptionLimits {
-    // Verifica se é usuário premium (tem pagamento válido)
-    if (this.hasPremiumAccess(user)) {
-      return {
-        dailyLimit: this.PREMIUM_DAILY_LIMIT,
-        daysRemaining: this.calculatePremiumDaysRemaining(user),
-        canApply: user.dailyUsage < this.PREMIUM_DAILY_LIMIT
-      };
-    }
+// // Verifica se o usuário tem acesso premium válido
+// function hasPremiumAccess(user: User): boolean {
+//   const now = new Date();
 
-    // Usuário free
-    if (user.planType === 'free') {
-      const freeTrialInfo = this.checkFreeTrialStatus(user);
-      return {
-        dailyLimit: this.FREE_DAILY_LIMIT,
-        daysRemaining: freeTrialInfo.daysRemaining,
-        canApply: freeTrialInfo.canApply,
-        reason: freeTrialInfo.reason
-      };
-    }
+//   const hasValidPayment = user.payment && 
+//     user.payment.status === 'completed' && 
+//     user.payment.endDate && 
+//     new Date(user.payment.endDate) > now;
 
-    return {
-      dailyLimit: 0,
-      daysRemaining: 0,
-      canApply: false,
-      reason: 'Invalid subscription status'
-    };
-  }
+//   const hasActiveSubscription = user.subscription && 
+//     user.subscription.status === 'active' || false;
 
-  private static hasPremiumAccess(user: User): boolean {
-    const now = new Date();
+//   return hasValidPayment || hasActiveSubscription;
+// }
 
-    // Verifica pagamento único válido
-    const hasValidPayment = user.payment && 
-      user.payment.status === 'completed' && 
-      user.payment.endDate && 
-      new Date(user.payment.endDate) > now;
+// // Calcula dias restantes do plano premium
+// function calculatePremiumDaysRemaining(user: User): number {
+//   const now = new Date();
 
-    // Verifica assinatura ativa
-    const hasActiveSubscription = user.subscription && 
-      user.subscription.status === 'active';
+//   if (user.payment?.endDate) {
+//     const endDate = new Date(user.payment.endDate);
+//     const diffTime = Math.abs(endDate.getTime() - now.getTime());
+//     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+//   }
 
-    return hasValidPayment || hasActiveSubscription || false;
-  }
+//   if (user.subscription?.status === 'active') {
+//     return -1; // -1 indica ilimitado
+//   }
 
-  private static calculatePremiumDaysRemaining(user: User): number {
-    const now = new Date();
+//   return 0;
+// }
 
-    if (user.payment?.endDate) {
-      const endDate = new Date(user.payment.endDate);
-      const diffTime = Math.abs(endDate.getTime() - now.getTime());
-      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    }
+// // Verifica status do período gratuito
+// function checkFreeTrialStatus(user: User): {
+//   canApply: boolean;
+//   daysRemaining: number;
+//   reason?: string;
+// } {
+//   const now = new Date();
+//   const startDate = new Date(user.startDate);
+//   const daysSinceStart = Math.floor(
+//     (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+//   );
 
-    // Para assinatura ativa, retorna null (ilimitado enquanto ativo)
-    if (user.subscription?.status === 'active') {
-      return -1; // -1 indica ilimitado
-    }
+//   if (daysSinceStart >= FREE_TOTAL_DAYS) {
+//     return {
+//       canApply: false,
+//       daysRemaining: 0,
+//       reason: 'Free trial expired'
+//     };
+//   }
 
-    return 0;
-  }
+//   const canApply = user.dailyUsage < FREE_DAILY_LIMIT;
+  
+//   return {
+//     canApply,
+//     daysRemaining: FREE_TOTAL_DAYS - daysSinceStart,
+//     reason: canApply ? undefined : 'Daily limit reached'
+//   };
+// }
 
-  private static checkFreeTrialStatus(user: User): {
-    canApply: boolean;
-    daysRemaining: number;
-    reason?: string;
-  } {
-    const now = new Date();
-    const startDate = new Date(user.startDate);
-    const daysSinceStart = Math.floor(
-      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+// // Verifica status da assinatura e limites
+// export function checkSubscriptionStatus(user: User): SubscriptionLimits {
+//   if (hasPremiumAccess(user)) {
+//     return {
+//       dailyLimit: PREMIUM_DAILY_LIMIT,
+//       daysRemaining: calculatePremiumDaysRemaining(user),
+//       canApply: user.dailyUsage < PREMIUM_DAILY_LIMIT
+//     };
+//   }
 
-    // Verifica se ainda está dentro dos 4 dias
-    if (daysSinceStart >= this.FREE_TOTAL_DAYS) {
-      return {
-        canApply: false,
-        daysRemaining: 0,
-        reason: 'Free trial expired'
-      };
-    }
+//   if (user.planType === 'free') {
+//     const freeTrialInfo = checkFreeTrialStatus(user);
+//     return {
+//       dailyLimit: FREE_DAILY_LIMIT,
+//       daysRemaining: freeTrialInfo.daysRemaining,
+//       canApply: freeTrialInfo.canApply,
+//       reason: freeTrialInfo.reason
+//     };
+//   }
 
-    // Verifica se ainda tem aplicações disponíveis hoje
-    const canApply = user.dailyUsage < this.FREE_DAILY_LIMIT;
-    
-    return {
-      canApply,
-      daysRemaining: this.FREE_TOTAL_DAYS - daysSinceStart,
-      reason: canApply ? undefined : 'Daily limit reached'
-    };
-  }
+//   return {
+//     dailyLimit: 0,
+//     daysRemaining: 0,
+//     canApply: false,
+//     reason: 'Invalid subscription status'
+//   };
+// }
 
-  static shouldResetDailyUsage(user: User): boolean {
-    if (!user.lastUsage) return true;
+// // Verifica se o uso diário deve ser resetado
+// export function shouldResetDailyUsage(user: User): boolean {
+//   if (!user.lastUsage) return true;
 
-    const now = new Date();
-    const lastUsage = new Date(user.lastUsage);
+//   const now = new Date();
+//   const lastUsage = new Date(user.lastUsage);
 
-    return (
-      now.getDate() !== lastUsage.getDate() ||
-      now.getMonth() !== lastUsage.getMonth() ||
-      now.getFullYear() !== lastUsage.getFullYear()
-    );
-  }
+//   return (
+//     now.getDate() !== lastUsage.getDate() ||
+//     now.getMonth() !== lastUsage.getMonth() ||
+//     now.getFullYear() !== lastUsage.getFullYear()
+//   );
+// }
 
-  static checkAndUpdatePlanStatus(user: User): { 
-    isValid: boolean; 
-    newPlanType: 'premium' | 'free' | 'none';
-  } {
-    const now = new Date();
+// // Verifica e atualiza o status do plano
+// export function checkAndUpdatePlanStatus(user: User): { 
+//   isValid: boolean; 
+//   newPlanType: 'premium' | 'free' | 'none';
+// } {
+//   const now = new Date();
 
-    // Verifica pagamento único válido
-    const hasValidPayment = user.payment && 
-      user.payment.status === 'completed' && 
-      user.payment.endDate && 
-      new Date(user.payment.endDate) >= now;
+//   // Se nunca comprou e está com planType free, verifica período gratuito
+//   if (!user.hasPurchased && user.planType === 'free') {
+//     const startDate = new Date(user.startDate);
+//     const daysSinceStart = Math.floor(
+//       (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+//     );
 
-    // Verifica assinatura ativa
-    const hasActiveSubscription = user.subscription && 
-      user.subscription.status.toLowerCase() === 'active';
+//     if (daysSinceStart < FREE_TOTAL_DAYS) {
+//       return { 
+//         isValid: true,
+//         newPlanType: 'free'
+//       };
+//     }
+//   }
 
-    // Se tem alguma forma válida de pagamento, mantém premium
-    if (hasValidPayment || hasActiveSubscription) {
-      return { 
-        isValid: true, 
-        newPlanType: 'premium' 
-      };
-    }
+//   // Se já comprou, verifica se tem acesso válido
+//   if (user.hasPurchased) {
+//     if (hasPremiumAccess(user)) {
+//       return { 
+//         isValid: true, 
+//         newPlanType: 'premium' 
+//       };
+//     }
 
-    // Se não tem pagamento válido, verifica se está no período gratuito
-    const startDate = new Date(user.startDate);
-    const daysSinceStart = Math.floor(
-      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+//     return { 
+//       isValid: false, 
+//       newPlanType: 'free' 
+//     };
+//   }
 
-    if (daysSinceStart < this.FREE_TOTAL_DAYS) {
-      return { 
-        isValid: true, 
-        newPlanType: 'free' 
-      };
-    }
+//   return { 
+//     isValid: false, 
+//     newPlanType: 'free' 
+//   };
+// } 
 
-    // Se não tem nada válido, muda para 'none'
-    return { 
-      isValid: false, 
-      newPlanType: 'none' 
-    };
-  }
-} 
+
+
+// -> como vai funcionar o processo contra espertinhos:
+// ao dar stop, sincroniza
+// ao pegar um usuário novo no useeffect, sincroniza
+
+

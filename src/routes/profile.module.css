@@ -126,3 +126,26 @@
     grid-template-columns: 1fr;
   }
 }
+
+.existingFile {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.fileDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.fileLink {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.fileLink:hover {
+  text-decoration: underline;
+}

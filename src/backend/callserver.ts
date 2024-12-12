@@ -10,9 +10,10 @@ import {
   handleLinkedinApply, 
   handleLinkedinPause, 
   handleLinkedinResume, 
-  handleLinkedinStop 
 } from "./endpoints/linkedin-controls";
 import { handleFetchAccount } from "./endpoints/account-handler";
+import { handleStop } from "./endpoints/stop";
+import { Browser } from "puppeteer";
 
 export function callServer() {
   const app = express();
@@ -27,10 +28,10 @@ export function callServer() {
     pageInstance: null,
     genAI: null,
     model: null,
-    stopApplyingLinkedin: false,
     pauseApplyingLinkedin: false,
     appliedJobsLinkedin: [],
-    websocket: null
+    websocket: null,
+    browser : null
   };
 
   wss.on('connection', (ws: WebSocket) => {
@@ -68,6 +69,13 @@ export function callServer() {
     });
   });
 
+  app.post("/stop", (req, res) => {
+    handleStop(req, res).catch((error) => {
+      console.error("Error in handleOpen:", error);
+      res.status(500).json({ error: "Internal server error" });
+    });
+  });
+
   app.post("/navigate", (req, res) => handleNavigate(req, res, serverContext));
   
   // LinkedIn routes
@@ -95,16 +103,17 @@ export function callServer() {
       res.status(500).json({ error: "Internal server error" });
     }
   });
-  app.post("/stop-apply-linkedin", async (req, res) => {
-    try {
-      await handleLinkedinStop(req, res, serverContext);
-    } catch (error) {
-      console.error("Error in handleLinkedinStop:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
+  // app.post("/stop-apply-linkedin", async (req, res) => {
+  //   try {
+  //     await handleLinkedinStop(req, res, serverContext);
+  //   } catch (error) {
+  //     console.error("Error in handleLinkedinStop:", error);
+  //     res.status(500).json({ error: "Internal server error" });
+  //   }
+  // });
 
   app.post("/fetch-account", (req, res) => handleFetchAccount(req, res, serverContext));
+
 
   return server;
 }

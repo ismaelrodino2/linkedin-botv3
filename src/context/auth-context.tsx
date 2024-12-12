@@ -3,8 +3,7 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { User } from '../types/user';
 import { SignInFormData } from "../routes/login";
-import { AuthService } from '../services/auth-service';
-import { SubscriptionService } from '../services/subscription-service';
+import { generateToken, getUserData, signIn } from "../services/auth-service";
 
 interface AuthContextType {
   user: User | null;
@@ -27,27 +26,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) return;
 
       try {
-        const userData = await AuthService.getUserData(token);
+        const userData = await getUserData(token);
         if (!userData) throw new Error('Invalid user data');
 
-        // Verifica e atualiza status do plano
-        const planStatus = SubscriptionService.checkAndUpdatePlanStatus(userData);
-        if (userData.planType !== planStatus.newPlanType) {
-          await AuthService.updateUser(token, { planType: planStatus.newPlanType });
-          userData.planType = planStatus.newPlanType;
-        }
-
-        // Verifica e reseta uso diário se necessário
-        if (SubscriptionService.shouldResetDailyUsage(userData)) {
-          const updated = await AuthService.updateUser(token, {
-            dailyUsage: 0,
-            lastUsage: new Date()
-          });
-          if (updated) {
-            userData.dailyUsage = 0;
-            userData.lastUsage = new Date();
-          }
-        }
 
         setUser(userData);
       } catch (err) {
@@ -62,10 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (data: SignInFormData) => {
     try {
-      const user = await AuthService.signIn(data.email, data.password);
+      const user = await signIn(data.email, data.password);
       if (!user) throw new Error('Login failed');
 
-      const token = await AuthService.generateToken(user);
+      const token = await generateToken(user);
       if (!token) throw new Error('Token generation failed');
 
       setCookie("authToken", token);

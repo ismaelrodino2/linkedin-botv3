@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
 import { UserResponse } from "./home-types";
 import { useAuth } from "../context/auth-context";
+import { stopService } from "../services/stop-service";
 
 export const useHome = () => {
   const [cookies] = useCookies(["authToken"]);
@@ -51,7 +52,7 @@ export const useHome = () => {
       }
       const result = await response.text();
       console.log(result);
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error:", error);
       alert(error.message);
       setIsRunning(false);
@@ -72,39 +73,37 @@ export const useHome = () => {
   }, []);
 
   const handleStopLinkedin = useCallback(async () => {
-    const url = "http://localhost:3001/stop-apply-linkedin";
-    const options = { method: "POST" };
 
     try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
+      // Envia o comando de parada
+      await stopService()
 
-      // Atualizar o usuário na API com o novo dailyUsage
-      const savedDailyUsage = localStorage.getItem('dailyUsage');
-      if (savedDailyUsage && user) {
-        const updateUserUrl = `${import.meta.env.VITE_SERVER_URL}/update-user`;
-        const updateResponse = await fetch(updateUserUrl, {
-          method: 'PUT',
-          headers: {
-            'Authorization': cookies.authToken,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            dailyUsage: parseInt(savedDailyUsage),
-            lastUsage: new Date().toISOString()
-          })
-        });
+      // Atualiza o usuário na API com o novo dailyUsage
+      // const savedDailyUsage = localStorage.getItem('dailyUsage');
+      // if (savedDailyUsage && user) {
+      //   const updateUserUrl = `${import.meta.env.VITE_SERVER_URL}/update-user`;
+      //   const updateResponse = await fetch(updateUserUrl, {
+      //     method: 'PUT',
+      //     headers: {
+      //       'Authorization': cookies.authToken,
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       dailyUsage: parseInt(savedDailyUsage),
+      //       lastUsage: new Date().toISOString()
+      //     })
+      //   });
 
-        if (!updateResponse.ok) {
-          throw new Error('Failed to update user data');
-        }
+      //   if (!updateResponse.ok) {
+      //     throw new Error('Failed to update user data');
+      //   }
 
-        // Limpar o contador local após atualizar a API
-        localStorage.removeItem('dailyUsage');
-      }
+      //   // Limpar o contador local após atualizar a API
+      //   localStorage.removeItem('dailyUsage');
+      // }
     } catch (error) {
       console.error("Error:", error);
+      // toast.error("Failed to stop the process. Please try again.");
     } finally {
       setIsRunning(false);
     }

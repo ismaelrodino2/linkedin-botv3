@@ -4,7 +4,7 @@ import { launch, executablePath } from "puppeteer";
 import { createGlobalPrompt } from "../prompt";
 import { ServerContext } from "./types";
 import { USER_DATA_DIR } from "../constants";
-import { User } from "../../context/auth-context";
+import { User } from "../../types/user";
 
 
 
@@ -51,6 +51,7 @@ export const handleOpen = async (
     });
 
     context.pageInstance = await browser.newPage();
+    context.browser = browser
     const [width, height] = await context.pageInstance.evaluate(() => [
       window.screen.width,
       window.screen.height
