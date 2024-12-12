@@ -6,7 +6,6 @@ import { JobInfo } from "../../types";
 
 async function clickDismissButton(page: Page) {
   try {
-    // Seleciona o botão e clica nele
     await page.click('button[aria-label="Dismiss"]');
     console.log("Dismiss button clicked.");
   } catch (error) {
@@ -19,7 +18,7 @@ export async function applyScript(
   model: GenerativeModel,
   addJobToArrayLinkedin: (job: JobInfo) => void,
   appliedJobsLinkedin: JobInfo[],
-  maxIterations: number,
+  remainingApplications: number,
   stopApplyingLinkedin: boolean,
   pauseApplyingLinkedin: boolean
 ) {
@@ -29,19 +28,24 @@ export async function applyScript(
 
   if (validLinks.length === 0) {
     console.log("No valid links found. Skipping applyJobs.");
-    return; // Ou outra lógica que você queira implementar
+    return;
   }
 
   for (const link of validLinks) {
-    while (pauseApplyingLinkedin) {
-      console.log("Processo pausado...");
-      await wait(500); // Espera 500 ms antes de checar novamente
-    }
-    if (appliedJobsLinkedin.length >= maxIterations && stopApplyingLinkedin) {
-      // Sai do loop se o comprimento de appliedJobsIndeed atingir maxIterations
-      validLinks = [];
+    if (appliedJobsLinkedin.length >= remainingApplications) {
+      console.log("Daily application limit reached");
       break;
     }
+
+    while (pauseApplyingLinkedin) {
+      console.log("Processo pausado...");
+      await wait(500);
+    }
+
+    if (stopApplyingLinkedin) {
+      break;
+    }
+
     await wait(350);
     if (link) {
       await applyJobs({

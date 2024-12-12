@@ -61,8 +61,6 @@ export function callServer() {
   app.use(json());
 
   // Routes  
-  // const upload = configureUpload();
-  // app.post("/upload", upload.single("file"), handleUpload);
   app.post("/open", (req, res) => {
     handleOpen(req, res, serverContext).catch((error) => {
       console.error("Error in handleOpen:", error);

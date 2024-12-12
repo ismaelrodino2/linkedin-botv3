@@ -3,21 +3,35 @@ import { useHome } from "./home-hooks";
 import styles from "./home.module.css";
 import { useState, useEffect } from "react";
 import { JobInfo } from "../backend/types";
+import { useAuth } from "../context/auth-context";
+import { SubscriptionService } from '../services/subscription-service';
 
 function Home() {
   const {
     handleStopLinkedin,
-    handleFetchAccount,
     handleSubmitLinkedin,
     handleOpenBrowser,
     isRunning,
   } = useHome();
 
+  const { user } = useAuth();
   const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
 
-  console.log("appliedJobs", appliedJobs);
+  // Efeito para atualizar o localStorage quando appliedJobs mudar
+  useEffect(() => {
+    if (user && appliedJobs.length > 0) {
+      const newDailyUsage = user.dailyUsage + 1;
+      localStorage.setItem('dailyUsage', newDailyUsage.toString());
+    }
+  }, [appliedJobs.length, user]);
 
   useEffect(() => {
+    // Recupera o dailyUsage do localStorage ao montar o componente
+    const savedDailyUsage = localStorage.getItem('dailyUsage');
+    if (savedDailyUsage && user) {
+      user.dailyUsage = parseInt(savedDailyUsage);
+    }
+
     const ws = new WebSocket("ws://localhost:3001");
 
     ws.onopen = () => {
@@ -45,6 +59,20 @@ function Home() {
       ws.close();
     };
   }, []);
+
+  const handleStartApplying = async () => {
+    if (!user) return;
+
+    const subscriptionStatus = SubscriptionService.checkSubscriptionStatus(user);
+    
+    if (!subscriptionStatus.canApply) {
+      alert(subscriptionStatus.reason || 'You cannot apply at this moment');
+      return;
+    }
+
+    // Se pode aplicar, continua com o processo
+    handleSubmitLinkedin();
+  };
 
   return (
     <div className={styles.container}>
@@ -80,19 +108,13 @@ function Home() {
             </button>
 
             {isRunning ? (
-              <button
-                onClick={handleStopLinkedin}
-                style={{ background: "transparent" }}
-              >
+              <button onClick={handleStopLinkedin}>
                 <span className={styles.stopIcon}>
                   <Square color="#9113CC" size={22} />
                 </span>
               </button>
             ) : (
-              <button
-                onClick={handleSubmitLinkedin}
-                style={{ background: "transparent" }}
-              >
+              <button onClick={handleStartApplying}>
                 <span className={styles.playIcon}>▶</span>
               </button>
             )}
@@ -159,7 +181,7 @@ function Home() {
                       <td>{el.language}</td>
                     </tr>
                   );
-                })}                
+                })}
               </tbody>
             </table>
           </div>

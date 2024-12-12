@@ -4,18 +4,17 @@ import { scrollToBottomAndBackSmoothly, sleep } from "../utils";
 import { applyScript } from "../apply-linkedin/scripts/applyScript";
 import { JobInfo } from "../types";
 import { navigateToNextPage } from "../apply-linkedin/scripts/generate-pagination-links";
-import { MAX_LINKEDIN_APPLICATIONS } from "../constants";
 import { WebSocket } from "ws";
+import { User } from "../../types/user";
+import { SubscriptionService } from "../../services/subscription-service";
 
 export const handleLinkedinApply = async (
-  _req: Request, 
+  req: Request, 
   res: Response, 
   context: ServerContext
 ) => {
   context.stopApplyingLinkedin = false;
-  const maxIterations = MAX_LINKEDIN_APPLICATIONS;
-
-  console.log("maxIterations:", maxIterations);
+  const user: User = req.body.user; // Recebe o usuário da requisição
 
   if (!context.pageInstance) {
     return res.status(400).json({ 
@@ -23,8 +22,19 @@ export const handleLinkedinApply = async (
     });
   }
 
+  // Verifica os limites do usuário
+  const subscriptionStatus = SubscriptionService.checkSubscriptionStatus(user);
+  
+  if (!subscriptionStatus.canApply) {
+    return res.status(403).json({ 
+      error: subscriptionStatus.reason || "You cannot apply at this moment" 
+    });
+  }
+
+  const remainingApplications = subscriptionStatus.dailyLimit - user.dailyUsage;
+
   while (
-    context.appliedJobsLinkedin.length < maxIterations && 
+    context.appliedJobsLinkedin.length < remainingApplications && 
     !context.stopApplyingLinkedin
   ) {
     try {
@@ -49,7 +59,7 @@ export const handleLinkedinApply = async (
           }
         },
         context.appliedJobsLinkedin,
-        maxIterations,
+        remainingApplications,
         context.stopApplyingLinkedin,
         context.pauseApplyingLinkedin
       );

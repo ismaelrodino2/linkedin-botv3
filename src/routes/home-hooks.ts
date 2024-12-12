@@ -34,18 +34,29 @@ export const useHome = () => {
 
   const handleSubmitLinkedin = useCallback(async () => {
     const url = "http://localhost:3001/apply-linkedin";
-    const options = { method: "POST" };
+    const options = { 
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ user })
+    };
 
     try {
       setIsRunning(true);
       const response = await fetch(url, options);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to start LinkedIn application');
+      }
       const result = await response.text();
       console.log(result);
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
       setIsRunning(false);
     }
-  }, []);
+  }, [user]);
 
   const handleSubmitIndeed = useCallback(async () => {
     const url = "http://localhost:3001/apply-indeed";
@@ -68,12 +79,36 @@ export const useHome = () => {
       const response = await fetch(url, options);
       const result = await response.text();
       console.log(result);
+
+      // Atualizar o usuário na API com o novo dailyUsage
+      const savedDailyUsage = localStorage.getItem('dailyUsage');
+      if (savedDailyUsage && user) {
+        const updateUserUrl = `${import.meta.env.VITE_SERVER_URL}/update-user`;
+        const updateResponse = await fetch(updateUserUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': cookies.authToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            dailyUsage: parseInt(savedDailyUsage),
+            lastUsage: new Date().toISOString()
+          })
+        });
+
+        if (!updateResponse.ok) {
+          throw new Error('Failed to update user data');
+        }
+
+        // Limpar o contador local após atualizar a API
+        localStorage.removeItem('dailyUsage');
+      }
     } catch (error) {
       console.error("Error:", error);
     } finally {
       setIsRunning(false);
     }
-  }, []);
+  }, [cookies.authToken, user]);
 
   // Nova função para buscar a conta do usuário usando o JWT do localStorage
   const handleFetchAccount = useCallback(async () => {

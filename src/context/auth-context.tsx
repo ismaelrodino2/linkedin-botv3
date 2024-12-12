@@ -1,239 +1,105 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { User } from '../types/user';
 import { SignInFormData } from "../routes/login";
-
-// Tipos
-type LanguageLevel = "Basic" | "Intermediate" | "Advanced" | "Native";
-type SoftwareLevel = "Basic" | "Intermediate" | "Advanced";
-
-interface Link {
-  name: string;
-  url: string;
-}
-
-interface Language {
-  language: string;
-  level: LanguageLevel;
-}
-
-interface Software {
-  name: string;
-  yearsOfExperience: string;
-  level: SoftwareLevel;
-}
-
-interface Technology {
-  name: string;
-  yearsOfExperience: string;
-}
-
-interface Availability {
-  canTravel: boolean;
-  canWorkInPerson: boolean;
-  needsSponsor: boolean;
-  immediateStart: boolean;
-  canWorkHybrid: boolean;
-}
-
-interface DesiredSalary {
-  country: string;
-  amount: string;
-}
-
-interface Account {
-  cv1: string | null;
-  cv2: string | null;
-  coverLetter1: string | null;
-  coverLetter2: string | null;
-  aboutMe: string;
-  experience: string;
-  links: Link[];
-  availability: Availability;
-  languages: Language[];
-  softwares: Software[];
-  softSkills: string;
-  hardSkills: string;
-  proficiency: string;
-  technologies: Technology[];
-  desiredSalaries: DesiredSalary[] | null;
-  id: number;
-  cv1filePath: string | null;
-  cv2filePath: string | null;
-  coverLetter1filePath: string | null;
-  coverLetter2filePath: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  expiration: Date | null;
-  paymentDate: Date | null;
-  hasPurchased: boolean;
-  accountId: number | null;
-  account: Account | null;
-}
+import { AuthService } from '../services/auth-service';
+import { SubscriptionService } from '../services/subscription-service';
 
 interface AuthContextType {
   user: User | null;
   login: (data: SignInFormData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  cookies: { authToken?: string };
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Configuração do JWT
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL;
-
-async function signIn(email: string, password: string) {
-  try {
-    const response = await fetch(`${SERVER_URL}/sign-in`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Erro:", errorData.response || errorData.error);
-      return;
-    }
-
-    const result = (await response.json()).user;
-    console.log("Sucesso:", result);
-    return result;
-  } catch (error) {
-    console.error("Erro na requisição:", error);
-    return;
-  }
-}
-
-// Provider
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
-
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const verifyToken = async () => {
+    async function verifyTokenAndReset() {
       const token = cookies.authToken;
-      if (token) {
-        try {
-          const response = await fetch(`${SERVER_URL}/get-user-account`, {
-            method: "GET",
-            headers: {
-              Authorization: token,
-              "Content-Type": "application/json",
-            },
-          });
+      if (!token) return;
 
-          if (!response.ok) {
-            throw new Error('Token inválido');
-          }
+      try {
+        const userData = await AuthService.getUserData(token);
+        if (!userData) throw new Error('Invalid user data');
 
-          const userData = await response.json();
-          console.log("userData", userData)
-          setUser(userData.user); // Salva os dados do usuário retornados pela API
-        } catch (err) {
-          console.error('Erro ao verificar token:', err);
-          removeCookie("authToken"); // Remove o token se for inválido
-          setUser(null);
+        // Verifica e atualiza status do plano
+        const planStatus = SubscriptionService.checkAndUpdatePlanStatus(userData);
+        if (userData.planType !== planStatus.newPlanType) {
+          await AuthService.updateUser(token, { planType: planStatus.newPlanType });
+          userData.planType = planStatus.newPlanType;
         }
+
+        // Verifica e reseta uso diário se necessário
+        if (SubscriptionService.shouldResetDailyUsage(userData)) {
+          const updated = await AuthService.updateUser(token, {
+            dailyUsage: 0,
+            lastUsage: new Date()
+          });
+          if (updated) {
+            userData.dailyUsage = 0;
+            userData.lastUsage = new Date();
+          }
+        }
+
+        setUser(userData);
+      } catch (err) {
+        console.error('Token verification error:', err);
+        removeCookie("authToken");
+        setUser(null);
       }
-    };
+    }
 
-    verifyToken();
-  }, [cookies.authToken, removeCookie]); // Adicionei as dependências do useEffect
-
-  async function generateToken(user: User) {
-    const response = await fetch(`${SERVER_URL}/encode-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user: { id: user.id } }),
-    });
-
-    const data = await response.json();
-    console.log("Generated Token:", data.token);
-    return data.token
-  }
+    verifyTokenAndReset();
+  }, [cookies.authToken, removeCookie]);
 
   const login = async (data: SignInFormData) => {
     try {
-      console.log("dataa", data);
-      // Faça login e receba o token
-      const user = await signIn(data.email, data.password);
-      if (user) {
-        console.log("o user é:", user)
-        const token = await generateToken(user);
+      const user = await AuthService.signIn(data.email, data.password);
+      if (!user) throw new Error('Login failed');
 
-        console.log("Token recebido:", token);
+      const token = await AuthService.generateToken(user);
+      if (!token) throw new Error('Token generation failed');
 
-        // Salve o token no cookie (evite JSON.stringify, já que o token é uma string)
-        setCookie("authToken", token);
-
-        const response = await fetch(`${SERVER_URL}/get-user-account`, {
-          method: "GET",
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Token inválido');
-        }
-
-        const userData = await response.json();
-
-        setUser(userData.user); // Salva o usuário no estado
-        navigate("/");
-      }
+      setCookie("authToken", token);
+      setUser(user);
+      navigate("/");
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
+      console.error("Login error:", error);
       throw error;
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     removeCookie("authToken");
     setUser(null);
     navigate("/");
   };
 
-  const isAuthenticated = !!user;
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      logout,
+      isAuthenticated: !!user,
+      cookies: { authToken: cookies.authToken }
+    }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-// Hook para usar o contexto
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };

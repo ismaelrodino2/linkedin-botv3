@@ -91,34 +91,6 @@ export async function applyJobs({
 
   console.log("todos valores de linkedin", fields);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Verificar a barra de progresso inicial
   bar1 = await checkProgressBar(page);
 
@@ -156,28 +128,20 @@ export async function applyJobs({
       }
     }
 
+    const jobInfo = {
+      company: fields.company,
+      currentDateTime: new Date(),
+      language: language,
+      location: fields.location,
+      platform: fields.platform,
+      position: fields.position,
+    };
 
+    console.log("teste de apito1", jobInfo);
 
+    addJobToArrayLinkedin(jobInfo);
 
-    
-  const jobInfo = {
-    company: fields.company,
-    currentDateTime: new Date(),
-    language: language,
-    location: fields.location,
-    platform: fields.platform,
-    position: fields.position,
-  };
-
-  console.log("teste de apito1", jobInfo)
-
-  addJobToArrayLinkedin(jobInfo);
-
-  console.log("teste de apito2")
-
-
-
-
+    console.log("teste de apito2");
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
     return;
