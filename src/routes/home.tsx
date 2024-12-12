@@ -4,7 +4,6 @@ import styles from "./home.module.css";
 import { useState, useEffect, useMemo } from "react";
 import { JobInfo } from "../backend/types";
 import { useAuth } from "../context/auth-context";
-import { checkSubscriptionStatus } from "../services/subscription-service";
 
 function Home() {
   const {
@@ -17,29 +16,11 @@ function Home() {
   const { user } = useAuth();
   const [appliedJobs, setAppliedJobs] = useState<JobInfo[]>([]);
 
-  // Calcula os limites baseados no plano do usuário
-  const subscriptionStatus = useMemo(() => {
-    if (!user) return null;
-    return checkSubscriptionStatus(user);
-  }, [user]);
-
-  // Calcula o número de aplicações restantes
-  const remainingApplications = useMemo(() => {
-    if (!subscriptionStatus) return 0;
-    return subscriptionStatus.dailyLimit - (user?.dailyUsage || 0);
-  }, [subscriptionStatus, user?.dailyUsage]);
-
-  // Efeito para atualizar o localStorage quando appliedJobs mudar
-  useEffect(() => {
-    if (user && appliedJobs.length > 0) {
-      const newDailyUsage = user.dailyUsage + 1;
-      localStorage.setItem('dailyUsage', newDailyUsage.toString());
-    }
-  }, [appliedJobs.length, user]);
+  const remainingApplications = 0
 
   useEffect(() => {
     // Recupera o dailyUsage do localStorage ao montar o componente
-    const savedDailyUsage = localStorage.getItem('dailyUsage');
+    const savedDailyUsage = localStorage.getItem("dailyUsage");
     if (savedDailyUsage && user) {
       user.dailyUsage = parseInt(savedDailyUsage);
     }
@@ -74,13 +55,6 @@ function Home() {
 
   const handleStartApplying = async () => {
     if (!user) return;
-
-    const subscriptionStatus = checkSubscriptionStatus(user);
-    
-    if (!subscriptionStatus.canApply) {
-      alert(subscriptionStatus.reason || 'You cannot apply at this moment');
-      return;
-    }
 
     // Se pode aplicar, continua com o processo
     handleSubmitLinkedin();
