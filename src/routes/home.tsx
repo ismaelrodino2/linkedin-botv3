@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
 import { useJobContext } from "../context/job-context";
+import { userLimitOnly } from "../utils/constants";
+import { Navigate } from "react-router-dom";
 
 function Home() {
   const [isRunning, setIsRunning] = useState(false);
@@ -13,7 +15,13 @@ function Home() {
   const { handleStopLinkedin } = useStopLinkedin({ setIsRunning });
 
   const { user } = useAuth();
-  const { appliedJobs, countAppliedJobs,setAppliedJobs,setWebsocketCount } = useJobContext();
+  if (!user) {
+    Navigate({ to: "/login" });
+    return;
+  }
+
+  const { appliedJobs, countAppliedJobs, setAppliedJobs, setWebsocketCount } =
+    useJobContext();
 
   const handleStartApplying = async () => {
     if (!user) return;
@@ -22,41 +30,41 @@ function Home() {
     handleSubmitLinkedin();
   };
 
-    useEffect(() => {
-      const ws = new WebSocket("ws://localhost:3001");
-  
-      ws.onopen = () => {
-        console.log("Connected to WebSocket server");
-      };
-  
-      ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        console.log("Received WebSocket message:", message);
-  
-        if (message.type === "newJob") {
-          console.log("New job applied:", message.data);
-  
-          // Incrementar o contador do WebSocket
-          setWebsocketCount((prevCount) => prevCount + 1);
-  
-          // Atualizar a lista de appliedJobs
-          setAppliedJobs((prev) => [...prev, message.data]);
-        }
-      };
-  
-      ws.onclose = () => {
-        console.log("Disconnected from WebSocket server");
-      };
-  
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-  
-      // Fechar a conexão do WebSocket quando o componente for desmontado
-      return () => {
-        ws.close();
-      };
-    }, []);
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3001");
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log("Received WebSocket message:", message);
+
+      if (message.type === "newJob") {
+        console.log("New job applied:", message.data);
+
+        // Incrementar o contador do WebSocket
+        setWebsocketCount((prevCount) => prevCount + 1);
+
+        // Atualizar a lista de appliedJobs
+        setAppliedJobs((prev) => [...prev, message.data]);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from WebSocket server");
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    // Fechar a conexão do WebSocket quando o componente for desmontado
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -75,7 +83,7 @@ function Home() {
           </div>
           <div>
             <h4>Remaining applications</h4>
-            <p>{countAppliedJobs - (user?.dailyUsage || 0)}</p>
+            <p>{userLimitOnly(user) - countAppliedJobs}</p> {/* erro */}
           </div>
         </div>
       </div>
@@ -105,7 +113,7 @@ function Home() {
 
             <span className={styles.remainingCount}>
               Remaining
-              <strong>{countAppliedJobs - (user?.dailyUsage || 0)}</strong>
+              <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
             </span>
           </div>
 
@@ -114,11 +122,11 @@ function Home() {
               <div className={styles.applicationStats}>
                 <div>
                   <span>Applications sent</span>
-                  <strong>{user?.dailyUsage || 0}</strong>
+                  <strong>{countAppliedJobs}</strong>
                 </div>
                 <div>
                   <span>Remaining applications</span>
-                  <strong>{countAppliedJobs - (user?.dailyUsage || 0)}</strong>
+                  <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
                 </div>
               </div>
             </div>

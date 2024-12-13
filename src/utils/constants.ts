@@ -24,4 +24,17 @@ export function userLimit(user: User, token: string): number {
   }
 }
 
+export function userLimitOnly(user: User): number {
+  switch (user.planType.toLowerCase()) {
+    case "free":
+      if (user.usedDaysFree < 4) {
+        return 10;
+      }
 
+      return 0;
+    case "premium":
+      return 80;
+    default:
+      return 0;
+  }
+}
