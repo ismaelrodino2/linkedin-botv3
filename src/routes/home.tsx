@@ -1,8 +1,7 @@
 import { Square } from "lucide-react";
 import { useHome } from "./home-hooks/home-hooks";
 import styles from "./home.module.css";
-import { useState, useEffect } from "react";
-import { JobInfo } from "../backend/types";
+import { useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
 import { useJobContext } from "../context/job-context";
