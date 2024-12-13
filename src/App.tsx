@@ -11,7 +11,6 @@ import { JobProvider } from "./context/job-context";
 function App() {
   return (
     <AuthProvider>
-      <JobProvider>
         <Routes>
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<Home />} />
@@ -22,7 +21,6 @@ function App() {
           </Route>
         </Routes>
         <ToastContainer />
-      </JobProvider>
     </AuthProvider>
   );
 }

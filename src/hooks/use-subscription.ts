@@ -4,16 +4,13 @@ import { useCookies } from "react-cookie";
 import { useAuth } from "../context/auth-context";
 import { useJobContext } from "../context/job-context";
 import { updateUser } from "../services/auth-service";
-
-// Constantes
-const PREMIUM_DAILY_LIMIT = 80;
-const FREE_DAILY_LIMIT = 10;
-const FREE_TOTAL_DAYS = 4;
+import { userLimit } from "../utils/constants";
+import { stopService } from "../services/stop-service";
 
 export function useSubscription() {
   const [cookies] = useCookies(["authToken"]);
 
-  const { appliedJobs } = useJobContext();
+  const { appliedJobs, countAppliedJobs } = useJobContext();
   const { user } = useAuth();
   const token = cookies.authToken;
 
@@ -36,16 +33,18 @@ export function useSubscription() {
       const appliedJobsStorage: number = parsedData?.appliedJobs ?? 0; // Define o valor ou 0 caso não exista
 
       if (appliedJobsStorage > appliedJobsDB) {
-        //significa que o usuário fechou o programa 
+        //significa que o usuário fechou o programa
         await updateUser(token, {
           dailyUsage: appliedJobsStorage,
-        }); 
-      } 
+        });
+      }
     }
   }
 
+
+
   return {
     sincronizeAfterStop,
-    sincronizeAfterLoginOrRefresh
+    sincronizeAfterLoginOrRefresh,
   };
 }

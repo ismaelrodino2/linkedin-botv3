@@ -11,6 +11,7 @@ export function useStopLinkedin({
 }) {
   const [cookies] = useCookies(["authToken"]);
   const { user } = useAuth();
+  
   const {sincronizeAfterStop} = useSubscription()
 
   const handleStopLinkedin = useCallback(async () => {

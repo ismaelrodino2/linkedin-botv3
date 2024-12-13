@@ -1,7 +1,7 @@
 import { Square } from "lucide-react";
 import { useHome } from "./home-hooks/home-hooks";
 import styles from "./home.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
 import { useJobContext } from "../context/job-context";
@@ -13,9 +13,7 @@ function Home() {
   const { handleStopLinkedin } = useStopLinkedin({ setIsRunning });
 
   const { user } = useAuth();
-  const {appliedJobs} = useJobContext()
-
-  const remainingApplications = 0;
+  const { appliedJobs, countAppliedJobs,setAppliedJobs,setWebsocketCount } = useJobContext();
 
   const handleStartApplying = async () => {
     if (!user) return;
@@ -23,6 +21,42 @@ function Home() {
     // Se pode aplicar, continua com o processo
     handleSubmitLinkedin();
   };
+
+    useEffect(() => {
+      const ws = new WebSocket("ws://localhost:3001");
+  
+      ws.onopen = () => {
+        console.log("Connected to WebSocket server");
+      };
+  
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log("Received WebSocket message:", message);
+  
+        if (message.type === "newJob") {
+          console.log("New job applied:", message.data);
+  
+          // Incrementar o contador do WebSocket
+          setWebsocketCount((prevCount) => prevCount + 1);
+  
+          // Atualizar a lista de appliedJobs
+          setAppliedJobs((prev) => [...prev, message.data]);
+        }
+      };
+  
+      ws.onclose = () => {
+        console.log("Disconnected from WebSocket server");
+      };
+  
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+  
+      // Fechar a conexão do WebSocket quando o componente for desmontado
+      return () => {
+        ws.close();
+      };
+    }, []);
 
   return (
     <div className={styles.container}>
@@ -37,11 +71,11 @@ function Home() {
         <div className={styles.statsCard}>
           <div>
             <h4>Applications sent</h4>
-            <p>{user?.dailyUsage || 0}</p>
+            <p>{countAppliedJobs}</p>
           </div>
           <div>
             <h4>Remaining applications</h4>
-            <p>{remainingApplications}</p>
+            <p>{countAppliedJobs - (user?.dailyUsage || 0)}</p>
           </div>
         </div>
       </div>
@@ -71,7 +105,7 @@ function Home() {
 
             <span className={styles.remainingCount}>
               Remaining
-              <strong>{remainingApplications}</strong>
+              <strong>{countAppliedJobs - (user?.dailyUsage || 0)}</strong>
             </span>
           </div>
 
@@ -84,7 +118,7 @@ function Home() {
                 </div>
                 <div>
                   <span>Remaining applications</span>
-                  <strong>{remainingApplications}</strong>
+                  <strong>{countAppliedJobs - (user?.dailyUsage || 0)}</strong>
                 </div>
               </div>
             </div>
@@ -119,7 +153,7 @@ function Home() {
               <tbody>
                 {appliedJobs.map((el) => {
                   return (
-                    <tr>
+                    <tr key={el.company}>
                       <td>
                         {el.currentDateTime &&
                           new Date(el.currentDateTime).toLocaleString()}

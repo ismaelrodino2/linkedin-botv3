@@ -1,8 +1,8 @@
 export type LanguageLevel = "Basic" | "Intermediate" | "Advanced" | "Native";
 export type SoftwareLevel = "Basic" | "Intermediate" | "Advanced";
-export type PlanType = 'premium' | 'free' | 'none';
-export type SubscriptionStatus = 'active' | 'canceled';
-export type PaymentStatus = 'pending' | 'completed' | 'failed';
+export type PlanType = "premium" | "free" | "none";
+export type SubscriptionStatus = "active" | "canceled";
+export type PaymentStatus = "pending" | "completed" | "failed";
 
 export interface Link {
   name: string;
@@ -92,9 +92,10 @@ export interface User {
   account: Account | null;
   dailyUsage: number;
   lastUsage: Date | null;
+  usedDaysFree: number;
   planType: PlanType;
   status: SubscriptionStatus;
   startDate: Date;
   subscription: Subscription | null;
   payment: Payment | null;
-} 
+}
