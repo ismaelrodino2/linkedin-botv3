@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useCookies } from "react-cookie";
 import { UserResponse } from "../home-types";
 import { useAuth } from "../../context/auth-context";

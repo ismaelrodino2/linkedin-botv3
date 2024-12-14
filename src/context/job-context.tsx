@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { JobInfo } from "../backend/types";
 import { useAuth } from "./auth-context";
-import { useSubscription } from "../hooks/use-subscription";
 import { userLimit } from "../utils/constants";
 import { stopService } from "../services/stop-service";
 import { updateUser } from "../services/auth-service";

@@ -5,7 +5,7 @@ config();
 
 export const PORT = 3001;
 
-export const USER_DATA_DIR = process.env.NODE_ENV !== "dev"
+export const USER_DATA_DIR = process.env.NODE_ENV !== "development"
   ? path.join(process.resourcesPath, "userDataDir")
   : path.resolve(__dirname, "./userDataDir");
 

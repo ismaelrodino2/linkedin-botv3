@@ -39,20 +39,17 @@ export default function Login() {
   // Criação do formulário usando react-hook-form
 
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
   const { login } = useAuth();
 
   // Handler de submissão do formulário
   const onSubmit = async (data: SignInFormData) => {
     setLoading(true);
-    setErrorMessage("");
 
     try {
       await login(data);
       // Sucesso no envio do OTP
     } catch (error) {
       console.error("Erro no login:", error);
-      setErrorMessage("Algo deu errado. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
     }

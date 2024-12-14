@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Home from "./routes/home";
 import Login from "./routes/login";
 import Profile from "./routes/profile";
@@ -6,7 +6,6 @@ import "./styles/App.css";
 import PrivateRoutes from "./components/private-routes";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/auth-context";
-import { JobProvider } from "./context/job-context";
 
 function App() {
   return (

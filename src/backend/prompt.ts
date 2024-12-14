@@ -1,4 +1,4 @@
-import { User } from "../context/auth-context";
+import { User } from "../types/user";
 
 export function createGlobalPrompt({ name, account, email }: User) {
   const today = new Date();

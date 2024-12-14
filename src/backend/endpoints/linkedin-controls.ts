@@ -5,16 +5,13 @@ import { applyScript } from "../apply-linkedin/scripts/applyScript";
 import { JobInfo } from "../types";
 import { navigateToNextPage } from "../apply-linkedin/scripts/generate-pagination-links";
 import { WebSocket } from "ws";
-import { User } from "../../types/user";
-// import { checkSubscriptionStatus } from "../../services/subscription-service";
 import { getStopProcessing } from "../apply-linkedin/scripts/stop";
 
 export const handleLinkedinApply = async (
-  req: Request,
+  _req: Request,
   res: Response,
   context: ServerContext
 ) => {
-  const user: User = req.body.user; // Recebe o usuário da requisição
 
   if (!context.pageInstance) {
     return res.status(400).json({

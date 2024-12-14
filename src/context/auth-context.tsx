@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { User } from '../types/user';
 import { SignInFormData } from "../routes/login";
 import { generateToken, getUserData, signIn } from "../services/auth-service";
+import { User } from "../types/user";
 
 interface AuthContextType {
   user: User | null;

@@ -173,10 +173,6 @@ export default function ProfileForm() {
     coverLetter2: user?.account?.coverLetter2,
   };
 
-  const {
-    formState: { errors },
-  } = methods;
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
@@ -194,8 +190,10 @@ export default function ProfileForm() {
       const token = cookies.authToken;
       console.log("token", token);
 
+      const sufixApi = user?.account ? "update-account" : "create-account"
+
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/create-account`,
+        `${import.meta.env.VITE_SERVER_URL}/${sufixApi}`,
         {
           method: "POST",
           body: formData,

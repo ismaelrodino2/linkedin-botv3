@@ -26,7 +26,7 @@ async function downloadPdf(url: string): Promise<Buffer | null> {
   }
 }
 
-export async function handleFetchAccount(req: Request, res: Response, serverContext: ServerContext) {
+export async function handleFetchAccount(req: Request, res: Response, _serverContext: ServerContext) {
   try {
     const { cv1, cv2, cl1, cl2 } = req.body as AccountUrls;
     

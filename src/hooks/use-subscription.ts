@@ -4,13 +4,11 @@ import { useCookies } from "react-cookie";
 import { useAuth } from "../context/auth-context";
 import { useJobContext } from "../context/job-context";
 import { updateUser } from "../services/auth-service";
-import { userLimit } from "../utils/constants";
-import { stopService } from "../services/stop-service";
 
 export function useSubscription() {
   const [cookies] = useCookies(["authToken"]);
 
-  const { appliedJobs, countAppliedJobs } = useJobContext();
+  const { appliedJobs } = useJobContext();
   const { user } = useAuth();
   const token = cookies.authToken;
 
