@@ -61,6 +61,7 @@ export interface Account {
   coverLetter2filePath: string | null;
   createdAt: Date;
   updatedAt: Date;
+  address: string;
 }
 
 export interface Subscription {

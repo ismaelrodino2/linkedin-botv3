@@ -83,6 +83,7 @@ const formSchema = z.object({
       amount: z.string().min(1, "Salary amount is required"),
     })
   ),
+  address: z.string().optional(),
 });
 
 const FileDisplay = ({ url, label }: { url: string | null, label: string }) => {
@@ -142,6 +143,7 @@ export default function ProfileForm() {
         country: "", 
         amount: "" 
       }],
+      address: user?.account?.address || "",
     },
   });
 
@@ -162,6 +164,7 @@ export default function ProfileForm() {
           country: "", 
           amount: "" 
         }],
+        address: user.account.address,
       });
     }
   }, [user, methods]);
@@ -759,6 +762,21 @@ export default function ProfileForm() {
                 )}
               />
             </div>
+          </div>
+          <div className={styles.section}>
+            <FormField
+              control={methods.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter your address" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <div style={{ display: "flex", flexDirection: "row-reverse" }}>
             <Button size="lg" type="submit" loading={loading}>
