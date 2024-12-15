@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useCookies } from "react-cookie";
-import { UserResponse } from "../home-types";
 import { useAuth } from "../../context/auth-context";
+import { useJobContext } from "../../context/job-context";
+import { resetIfNextDay, userLimit } from "../../utils/common";
 
 export const useHome = ({
   setIsRunning,
@@ -10,6 +11,9 @@ export const useHome = ({
 }) => {
   const [cookies] = useCookies(["authToken"]);
   const { user } = useAuth();
+  const { countAppliedJobs, setAppliedJobs, setWebsocketCount } =
+    useJobContext();
+  const token = cookies.authToken;
 
   const handleOpenBrowser = useCallback(async () => {
     if (!user || !user.account) {
@@ -35,7 +39,15 @@ export const useHome = ({
     }
   }, [user]);
 
-  const handleSubmitLinkedin = useCallback(async () => {
+  const handlePlayLinkedin = useCallback(async () => {
+    if (!user) return new Error("Not authenticated");
+
+    resetIfNextDay(user, token, setAppliedJobs, setWebsocketCount);
+
+    if (countAppliedJobs >= userLimit(user, token)) {
+      return new Error("Sorry, you reached your limit");
+    }
+
     const url = "http://localhost:3001/apply-linkedin";
     const options = {
       method: "POST",
@@ -61,76 +73,8 @@ export const useHome = ({
     }
   }, [user]);
 
-  const handleSubmitIndeed = useCallback(async () => {
-    const url = "http://localhost:3001/apply-indeed";
-    const options = { method: "POST" };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }, []);
-
-  // Nova função para buscar a conta do usuário usando o JWT do localStorage
-  const handleFetchAccount = useCallback(async () => {
-    const token = cookies.authToken;
-
-    if (!token) {
-      console.error("Token não encontrado");
-      return;
-    }
-
-    const url1 = `${import.meta.env.VITE_SERVER_URL}/get-user-account`;
-    const options = {
-      method: "GET",
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-    };
-
-    try {
-      const response = await fetch(url1, options);
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar a conta: ${response.status}`);
-      }
-
-      const data: UserResponse = await response.json();
-      console.log("Conta do usuário:", data);
-
-      // Nova chamada para processar os arquivos localmente
-      const localUrl = "http://localhost:3001/fetch-account";
-      const uploadOptions = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cv1: data.user.account.cv1,
-          cv2: data.user.account.cv2,
-          cl1: data.user.account.coverLetter1,
-          cl2: data.user.account.coverLetter2,
-        }),
-      };
-
-      const uploadResponse = await fetch(localUrl, uploadOptions);
-      if (!uploadResponse.ok) {
-        throw new Error("Falha ao processar os arquivos");
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Erro:", error);
-    }
-  }, [cookies.authToken]);
-
   return {
     handleOpenBrowser,
-    handleSubmitLinkedin,
-    handleSubmitIndeed,
-    handleFetchAccount,
+    handlePlayLinkedin,
   };
 };

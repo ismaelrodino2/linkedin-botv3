@@ -1,9 +1,17 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { SignInFormData } from "../routes/login";
 import { generateToken, getUserData, signIn } from "../services/auth-service";
 import { User } from "../types/user";
+import { toast } from "react-toastify";
+import { useSubscriptionAuth } from "../hooks/use-subscription-auth";
 
 interface AuthContextType {
   user: User | null;
@@ -19,20 +27,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
   const [user, setUser] = useState<User | null>(null);
+  const { sincronizeAfterLoginOrRefresh } = useSubscriptionAuth();
 
   useEffect(() => {
     async function verifyTokenAndReset() {
       const token = cookies.authToken;
-      if (!token) return;
+      if (!token || !user) {
+        navigate("/login");
+        return;
+      }
 
       try {
         const userData = await getUserData(token);
-        if (!userData) throw new Error('Invalid user data');
+        if (!userData) throw new Error("Invalid user data");
 
+        const newDailyUsage = await sincronizeAfterLoginOrRefresh(
+          user.dailyUsage
+        );
 
-        setUser(userData);
+        setUser({ ...userData, dailyUsage: newDailyUsage ?? 0 });
       } catch (err) {
-        console.error('Token verification error:', err);
+        console.error("Token verification error:", err);
         removeCookie("authToken");
         setUser(null);
       }
@@ -44,17 +59,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (data: SignInFormData) => {
     try {
       const user = await signIn(data.email, data.password);
-      if (!user) throw new Error('Login failed');
+      if (!user) throw new Error("Login failed");
 
       const token = await generateToken(user);
-      if (!token) throw new Error('Token generation failed');
+      if (!token) throw new Error("Token generation failed");
 
       setCookie("authToken", token);
-      setUser(user);
+      const newDailyUsage = await sincronizeAfterLoginOrRefresh(
+        user.dailyUsage
+      );
+
+      setUser({ ...user, dailyUsage: newDailyUsage ?? 0 });
+      await sincronizeAfterLoginOrRefresh(user.dailyUsage);
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);
-      throw error;
+      toast.error("Error signing in");
     }
   };
 
@@ -65,13 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      isAuthenticated: !!user,
-      cookies: { authToken: cookies.authToken }
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated: !!user,
+        cookies: { authToken: cookies.authToken },
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

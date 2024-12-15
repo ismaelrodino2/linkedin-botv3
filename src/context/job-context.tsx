@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { JobInfo } from "../backend/types";
 import { useAuth } from "./auth-context";
-import { userLimit } from "../utils/constants";
+import { userLimit } from "../utils/common";
 import { stopService } from "../services/stop-service";
 import { updateUser } from "../services/auth-service";
 import { useCookies } from "react-cookie";

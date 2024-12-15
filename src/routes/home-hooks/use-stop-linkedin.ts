@@ -3,6 +3,7 @@ import { stopService } from "../../services/stop-service";
 import { useCookies } from "react-cookie";
 import { useAuth } from "../../context/auth-context";
 import { useSubscription } from "../../hooks/use-subscription";
+import { toast } from "react-toastify";
 
 export function useStopLinkedin({
   setIsRunning,
@@ -18,10 +19,10 @@ export function useStopLinkedin({
     try {
       // Envia o comando de parada
       await stopService();
-      await sincronizeAfterStop
+      await sincronizeAfterStop()
     } catch (error) {
       console.error("Error:", error);
-      // toast.error("Failed to stop the process. Please try again.");
+      toast.error("Failed to stop the process. Please close the app.");
     } finally {
       setIsRunning(false);
     }

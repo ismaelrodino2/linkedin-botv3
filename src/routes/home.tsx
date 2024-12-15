@@ -5,18 +5,19 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
 import { useJobContext } from "../context/job-context";
-import { userLimitOnly } from "../utils/constants";
-import { Navigate } from "react-router-dom";
+import { userLimitOnly } from "../utils/common";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [isRunning, setIsRunning] = useState(false);
+  const navigate = useNavigate();
 
-  const { handleSubmitLinkedin, handleOpenBrowser } = useHome({ setIsRunning });
+  const { handlePlayLinkedin, handleOpenBrowser } = useHome({ setIsRunning });
   const { handleStopLinkedin } = useStopLinkedin({ setIsRunning });
 
   const { user } = useAuth();
   if (!user) {
-    Navigate({ to: "/login" });
+    navigate("/login");
     return;
   }
 
@@ -27,7 +28,7 @@ function Home() {
     if (!user) return;
 
     // Se pode aplicar, continua com o processo
-    handleSubmitLinkedin();
+    handlePlayLinkedin();
   };
 
   useEffect(() => {
@@ -135,16 +136,6 @@ function Home() {
 
         <div className={styles.reportSection}>
           <h2>Report</h2>
-
-          {/* <div className={styles.periodSelector}>
-            <label>Period</label>
-            <select>
-              <option>Select</option>
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
-              <option>Last 3 months</option>
-            </select>
-          </div> */}
 
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
