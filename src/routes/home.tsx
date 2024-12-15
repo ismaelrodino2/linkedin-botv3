@@ -73,8 +73,11 @@ function Home() {
       <div className={styles.sidebar}>
         <div className={styles.profileCard}>
           <h3>{user?.name}</h3>
-          <p>Product Designer • UX/UI • AI Enthusiast</p>
-          <p>Based in Rio de Janeiro • Brasil</p>
+          <p>
+            {user.account &&
+              user.account.softwares.map((el) => el.name).join(" • ")}
+          </p>
+          {user.account && <p>Based in {user.account.address}</p>}
         </div>
 
         <div className={styles.statsCard}>
