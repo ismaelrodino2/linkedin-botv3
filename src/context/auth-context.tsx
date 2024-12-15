@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function verifyTokenAndReset() {
       const token = cookies.authToken;
-      if (!token || !user) {
+      if (!token) {
         navigate("/login");
         return;
       }
@@ -42,10 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!userData) throw new Error("Invalid user data");
 
         const newDailyUsage = await sincronizeAfterLoginOrRefresh(
-          user.dailyUsage
+          userData.dailyUsage
         );
 
+        console.log("userData", userData);
+
         setUser({ ...userData, dailyUsage: newDailyUsage ?? 0 });
+        console.log("qqqq", user, token);
       } catch (err) {
         console.error("Token verification error:", err);
         removeCookie("authToken");
@@ -58,19 +61,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (data: SignInFormData) => {
     try {
-      const user = await signIn(data.email, data.password);
-      if (!user) throw new Error("Login failed");
+      const userData = await signIn(data.email, data.password);
+      if (!userData) throw new Error("Login failed");
 
-      const token = await generateToken(user);
+      const token = await generateToken(userData);
       if (!token) throw new Error("Token generation failed");
 
       setCookie("authToken", token);
       const newDailyUsage = await sincronizeAfterLoginOrRefresh(
-        user.dailyUsage
+        userData.dailyUsage
       );
 
-      setUser({ ...user, dailyUsage: newDailyUsage ?? 0 });
-      await sincronizeAfterLoginOrRefresh(user.dailyUsage);
+      setUser({ ...userData, dailyUsage: newDailyUsage ?? 0 });
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);
