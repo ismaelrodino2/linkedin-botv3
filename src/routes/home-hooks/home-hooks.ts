@@ -3,6 +3,7 @@ import { useCookies } from "react-cookie";
 import { useAuth } from "../../context/auth-context";
 import { useJobContext } from "../../context/job-context";
 import { resetIfNextDay, userLimit, userLimitOnly } from "../../utils/common";
+import { updateUser } from "../../services/auth-service";
 
 export const useHome = ({
   setIsRunning,
@@ -51,7 +52,7 @@ export const useHome = ({
       return new Error("Sorry, you reached your limit");
     }
 
-    const remainingApplications = userLimitOnly(user) - countAppliedJobs
+    const remainingApplications = userLimitOnly(user) - countAppliedJobs;
 
     const url = "http://localhost:3001/apply-linkedin";
     const options = {
@@ -70,13 +71,24 @@ export const useHome = ({
         throw new Error(error.error || "Failed to start LinkedIn application");
       }
       const result = await response.text();
+      //aqui atualizar o user dailyUsage
       console.log(result);
+
+      if (
+        response.status === 200 &&
+        result === "Application process completed"
+      ) {
+        await updateUser(token, {
+          dailyUsage: countAppliedJobs,
+          lastUsage: new Date(),
+        });
+      }
     } catch (error: any) {
       console.error("Error:", error);
       alert(error.message);
       setIsRunning(false);
     }
-  }, [user]);
+  }, [user, countAppliedJobs]);
 
   return {
     handleOpenBrowser,

@@ -20,7 +20,7 @@ export async function scrollToBottomAndBackSmoothly(
   async function scroll(direction: "down" | "up") {
     let previousScrollTop = 0;
 
-    while (true) {
+    while (true && (await browser?.pages())?.length) {
       if (getStopProcessing()) {
         res.status(200).send('Processamento interrompido.');
         await browser?.close()

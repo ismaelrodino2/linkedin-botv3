@@ -11,7 +11,6 @@ import { SignInFormData } from "../routes/login";
 import { generateToken, getUserData, signIn } from "../services/auth-service";
 import { User } from "../types/user";
 import { toast } from "react-toastify";
-import { useSubscriptionAuth } from "../hooks/use-subscription-auth";
 
 interface AuthContextType {
   user: User | null;

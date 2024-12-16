@@ -5,7 +5,7 @@ import { applyScript } from "../apply-linkedin/scripts/applyScript";
 import { JobInfo } from "../types";
 import { navigateToNextPage } from "../apply-linkedin/scripts/generate-pagination-links";
 import { WebSocket } from "ws";
-import { getStopProcessing } from "../apply-linkedin/scripts/stop";
+import { getStopProcessing, setStopProcessing } from "../apply-linkedin/scripts/stop";
 
 export const handleLinkedinApply = async (
   req: Request,
@@ -22,7 +22,7 @@ export const handleLinkedinApply = async (
   const { remainingApplications } = req.body; // Captura o objeto user enviado pelo body
 
   while (
-    context.appliedJobsLinkedin.length < remainingApplications
+    context.appliedJobsLinkedin.length < remainingApplications && (await context.browser?.pages())?.length
   ) {
     // context.browser?.on('disconnected', () => {
     //   console.log('O navegador foi fechado!');
@@ -85,7 +85,8 @@ export const handleLinkedinApply = async (
     }
   }
 
-  res.send("Application process completed");
+  setStopProcessing(true); // Sinaliza para parar
+  res.status(200).send("Application process completed");
 };
 
 export const handleLinkedinPause = (

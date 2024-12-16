@@ -153,7 +153,7 @@ export async function applyJobs({
       return;
     }
 
-    while (maxPages--) {
+    while (maxPages-- && (await browser?.pages())?.length) {
       await applyProcess(page, model, language, res, browser, bar1);
     }
 
