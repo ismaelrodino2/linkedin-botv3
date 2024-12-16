@@ -120,7 +120,7 @@ function Home() {
 
             {isRunning ? (
               <Button
-                style={{ background: "white" }}
+                style={{ background: "white", color: "black" }}
                 loading={loadingStop}
                 onClick={async () => {
                   setLoadingStop(true);

@@ -36,7 +36,7 @@ export function useStopLinkedin({
         lastUsage: new Date(),
       });
 
-      await timeout(2000); // 3000ms = 3s
+      await timeout(3000); // 3000ms = 3s
 
       await returnStartService()
     } catch (error) {
