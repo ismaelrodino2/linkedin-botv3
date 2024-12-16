@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies(["authToken"]);
   const [user, setUser] = useState<User | null>(null);
-  const { sincronizeAfterLoginOrRefresh } = useSubscriptionAuth();
+  // const { sincronizeAfterLoginOrRefresh } = useSubscriptionAuth();
 
   useEffect(() => {
     async function verifyTokenAndReset() {
@@ -41,13 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await getUserData(token);
         if (!userData) throw new Error("Invalid user data");
 
-        const newDailyUsage = await sincronizeAfterLoginOrRefresh(
-          userData.dailyUsage
-        );
-
         console.log("userData", userData);
 
-        setUser({ ...userData, dailyUsage: newDailyUsage ?? 0 });
+        setUser({ ...userData });
         console.log("qqqq", user, token);
       } catch (err) {
         console.error("Token verification error:", err);
@@ -68,11 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) throw new Error("Token generation failed");
 
       setCookie("authToken", token);
-      const newDailyUsage = await sincronizeAfterLoginOrRefresh(
-        userData.dailyUsage
-      );
 
-      setUser({ ...userData, dailyUsage: newDailyUsage ?? 0 });
+      setUser({ ...userData });
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);

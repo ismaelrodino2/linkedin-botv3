@@ -1,8 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useAuth } from "../../context/auth-context";
 import { useJobContext } from "../../context/job-context";
-import { resetIfNextDay, userLimit } from "../../utils/common";
+import { resetIfNextDay, userLimit, userLimitOnly } from "../../utils/common";
 
 export const useHome = ({
   setIsRunning,
@@ -14,6 +14,11 @@ export const useHome = ({
   const { countAppliedJobs, setAppliedJobs, setWebsocketCount } =
     useJobContext();
   const token = cookies.authToken;
+
+  useEffect(() => {
+    if (!user) return;
+    resetIfNextDay(user, token, setAppliedJobs, setWebsocketCount);
+  }, []);
 
   const handleOpenBrowser = useCallback(async () => {
     if (!user || !user.account) {
@@ -42,11 +47,11 @@ export const useHome = ({
   const handlePlayLinkedin = useCallback(async () => {
     if (!user) return new Error("Not authenticated");
 
-    resetIfNextDay(user, token, setAppliedJobs, setWebsocketCount);
-
     if (countAppliedJobs >= userLimit(user, token)) {
       return new Error("Sorry, you reached your limit");
     }
+
+    const remainingApplications = userLimitOnly(user) - countAppliedJobs
 
     const url = "http://localhost:3001/apply-linkedin";
     const options = {
@@ -54,7 +59,7 @@ export const useHome = ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user }),
+      body: JSON.stringify({ remainingApplications }),
     };
 
     try {

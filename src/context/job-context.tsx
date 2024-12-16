@@ -34,6 +34,8 @@ export const JobProvider: React.FC<{ children: ReactNode }> = ({
   const { user } = useAuth();
   const token = cookies.authToken;
 
+  console.log("websocketCount123", websocketCount)
+
   async function verifyIfItsInLimit() {
     if (!user) return new Error("User not found");
 
@@ -49,14 +51,15 @@ export const JobProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const updateAppliedJobs = async () => {
       const total = (user?.dailyUsage ?? 0) + websocketCount;
+      console.log("totaltotal", total, user?.dailyUsage, websocketCount)
       setCountAppliedJobs(total);
 
       // Atualiza o localStorage com o valor fixo de dailyUsage + contador do WebSocket
       await verifyIfItsInLimit();
-      localStorage.setItem(
-        "appliedJobs",
-        JSON.stringify({ appliedJobs: total })
-      );
+      // localStorage.setItem(
+      //   "appliedJobs",
+      //   JSON.stringify({ appliedJobs: total })
+      // );
     };
 
     updateAppliedJobs();

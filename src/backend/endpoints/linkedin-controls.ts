@@ -8,7 +8,7 @@ import { WebSocket } from "ws";
 import { getStopProcessing } from "../apply-linkedin/scripts/stop";
 
 export const handleLinkedinApply = async (
-  _req: Request,
+  req: Request,
   res: Response,
   context: ServerContext
 ) => {
@@ -19,20 +19,22 @@ export const handleLinkedinApply = async (
     });
   }
 
-  // Verifica os limites do usuário
-  // const subscriptionStatus = checkSubscriptionStatus(user);
-
-  // if (!subscriptionStatus.canApply) {
-  //   return res.status(403).json({
-  //     error: subscriptionStatus.reason || "You cannot apply at this moment",
-  //   });
-  // }
-
-  const remainingApplications = 6
+  const { remainingApplications } = req.body; // Captura o objeto user enviado pelo body
 
   while (
     context.appliedJobsLinkedin.length < remainingApplications
   ) {
+    // context.browser?.on('disconnected', () => {
+    //   console.log('O navegador foi fechado!');
+    //   res.status(200).send("Processamento interrompido.");
+    //   return;
+    // });
+    if (!context.pageInstance) {
+      return res.status(400).json({
+        error: "Browser page not initialized. Please open LinkedIn first.",
+      });
+    }
+  
     try {
       if (getStopProcessing()) {
         await context.browser?.close();

@@ -87,14 +87,6 @@ export function callServer() {
     }
   });
 
-  // app.post("/resume-apply-linkedin", async (req, res) => {
-  //   try {
-  //      handleLinkedinResume(req, res, serverContext);
-  //   } catch (error) {
-  //     console.error("Error in handleLinkedinResume:", error);
-  //     res.status(500).json({ error: "Internal server error" });
-  //   }
-  // });
 
   app.post("/fetch-account", (req, res) =>
     handleFetchAccount(req, res, serverContext)

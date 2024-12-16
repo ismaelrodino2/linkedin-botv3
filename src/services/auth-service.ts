@@ -62,6 +62,7 @@ export async function getUserData(token: string): Promise<User | null> {
 
 // Atualiza os dados do usuário
 export async function updateUser(token: string, data: Partial<User>): Promise<boolean> {
+  console.log("qweqwe", data)
   try {
     const response = await fetch(`${SERVER_URL}/update-user`, {
       method: 'PUT',

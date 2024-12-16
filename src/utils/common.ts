@@ -1,5 +1,3 @@
-// export const enCV = "https://res.cloudinary.com/dntfrxqpw/image/upload/v1727919577/cv-en_vpjjhs.pdf"
-
 import { JobInfo } from "../backend/types";
 import { updateUser } from "../services/auth-service";
 import { User } from "../types/user";
@@ -17,11 +15,6 @@ function isTodayGreaterThanLastUsage(lastUsage: Date | null): boolean {
   }
   return false;
 }
-
-// export const ptCV = "https://res.cloudinary.com/dntfrxqpw/image/upload/v1727919542/designer-pt.cv_ytlf90.pdf"
-
-// export const enCL = "https://res.cloudinary.com/dntfrxqpw/image/upload/v1727920143/cl-en_hdarxo.pdf"
-// export const ptCL = "https://res.cloudinary.com/dntfrxqpw/image/upload/v1727920143/cl-pt_ndqbox.pdf"
 
 export function userLimit(user: User, token: string): number {
   switch (user.planType.toLowerCase()) {
@@ -67,10 +60,12 @@ export async function resetIfNextDay(
     await updateUser(token, {
       dailyUsage: 0,
     });
-    localStorage.setItem("appliedJobs", JSON.stringify({ appliedJobs: 0 }));
+    // localStorage.setItem("appliedJobs", JSON.stringify({ appliedJobs: 0 }));
     setAppliedJobs([]);
     setWebsocketCount(0);
   }
+
+  console.log("qqq", import.meta.env.VITE_FREE_TOTAL_DAYS, isTodayGreaterThanLastUsage(user.lastUsage), user.usedDaysFree)
 
   if (
     user.planType === "free" &&
@@ -80,7 +75,7 @@ export async function resetIfNextDay(
     await updateUser(token, {
       dailyUsage: 0,
     });
-    localStorage.setItem("appliedJobs", JSON.stringify({ appliedJobs: 0 }));
+    // localStorage.setItem("appliedJobs", JSON.stringify({ appliedJobs: 0 }));
     setAppliedJobs([]);
     setWebsocketCount(0);
   }

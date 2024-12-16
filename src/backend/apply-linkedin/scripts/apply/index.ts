@@ -18,17 +18,14 @@ async function clickApplyButton(page: Page): Promise<void> {
     const buttonText = await page.evaluate((applyButtonSelector) => {
       const button = document.querySelector(applyButtonSelector);
       return button ? button.textContent?.trim() : null;
-    }, selectors.applyButton); // Passe o seletor como argumento
+    }, selectors.applyButton);
 
     if (buttonText === "Apply" || buttonText === "Continue applying") {
       await page.click(selectors.applyButton);
     }
     await page.click(selectors.easyApplyButtonEnabled);
   } catch (error) {
-    console.log(
-      "🚀 ~ file: index.ts:18 ~ clickEasyApplyButton ~ error:",
-      error
-    );
+    console.log("🚀 ~ file: index.ts:18 ~ clickEasyApplyButton ~ error:", error);
   }
 }
 
@@ -52,8 +49,8 @@ interface Params {
   link: string;
   addJobToArrayLinkedin: (job: JobInfo) => void;
   browser: Browser | null;
-  appliedJobsLinkedin: number
-  remainingApplications: number
+  appliedJobsLinkedin: number;
+  remainingApplications: number;
 }
 
 export async function applyJobs({
@@ -64,12 +61,11 @@ export async function applyJobs({
   addJobToArrayLinkedin,
   browser,
   appliedJobsLinkedin,
-  remainingApplications
+  remainingApplications,
 }: Params) {
   let bar1 = 0;
   let bar2 = 0;
 
-  
   if (appliedJobsLinkedin >= remainingApplications) {
     console.log("Daily application limit reached");
     res.status(200).send("Processamento interrompido.");
@@ -82,40 +78,24 @@ export async function applyJobs({
   // Verifica se devemos parar após navegar para a página
   if (getStopProcessing()) {
     res.status(200).send("Processamento interrompido.");
-    await browser?.close()
-
+    await browser?.close();
     return;
   }
 
   const lngDetector = new LanguageDetect();
-
-  // OR
-  // const lngDetector = new (require('languagedetect'));
-
-  const jobDescriptionElements = await page.$$(
-    ".jobs-box__html-content .mt4 > p[dir='ltr'] span"
-  );
+  const jobDescriptionElements = await page.$$(".jobs-box__html-content .mt4 > p[dir='ltr'] span");
   const jobDescriptionText = await Promise.all(
-    jobDescriptionElements.map((element) =>
-      element.evaluate((el) => el.innerText)
-    )
+    jobDescriptionElements.map((element) => element.evaluate((el) => el.innerText))
   ).then((textArray) => textArray.join(" "));
 
-  console.log("jobDescriptionElements", jobDescriptionElements);
   let language: string = "en"; // Default to 'en' or another default language of your choice
 
-  console.log("todas strings linkedin lang", jobDescriptionText);
   if (jobDescriptionText) {
     const lang = lngDetector.detect(jobDescriptionText, 1);
-
-    console.log("lang", lang);
-
     language = lang[0][0] as string;
   }
 
   const fields = await getJobInfo(page, language);
-
-  console.log("todos valores de linkedin", fields);
 
   // Verificar a barra de progresso inicial
   bar1 = await checkProgressBar(page);
@@ -123,43 +103,45 @@ export async function applyJobs({
   await sleep(600);
   try {
     console.log("Applying to", link);
-    // [TODO] change this var
     await clickApplyButton(page);
     await clickApplyButton(page);
 
-    let maxPages = 7;
-    // let maxTries = 2;
-    while (maxPages--) {
-      // Verifica se devemos parar durante o preenchimento
-      if (getStopProcessing()) {
-        res.status(200).send("Processamento interrompido.");
-        await browser?.close()
+    await applyProcess(page, model, language, res, browser, bar1);
 
-        return;
-      }
+    let maxPages = 7
 
-      await wait(200);
-      await fillFields(page, model, language).catch(noop);
+    // Verificar a barra de progresso após clicar no botão "Next"
+    bar2 = await checkProgressBar(page);
 
-      // Verificar a barra de progresso após clicar no botão "Next"
-      bar2 = await checkProgressBar(page);
+    // Aguarda o seletor estar disponível na página
+    const selector = '.pl3.t-14.t-black--light[role="note"]';
+    await page.waitForSelector(selector);
 
-      await clickNextButton(page).catch(noop);
-
-      // Comparar se a barra de progresso mudou
-      if (bar1 === bar2) {
-        console.log("Progress bar did not change, breaking loop...");
-        const isSubmitButtonEn = page.$(
-          ".jobs-easy-apply-modal button[aria-label='Submit application']"
-        );
-        const isSubmitButtonPt = page.$(
-          ".jobs-easy-apply-modal button[aria-label='Enviar candidatura']"
-        );
-        if (!isSubmitButtonEn || !isSubmitButtonPt) {
-          console.log("teste aqui 123321");
-          break; // Se o valor não mudou, sai do loop
+    // Obtém o valor do elemento e extrai apenas o número
+    const valueProgressAfterOne = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      if (element) {
+        const text = element.textContent?.trim(); // Exemplo: "50%"
+        if (text) { // Verifica se text não é undefined
+          const numberOnly = text.replace('%', ''); // Remove o símbolo "%"
+          return parseFloat(numberOnly); // Converte para número
         }
       }
+      return null; // Retorna null se não houver texto
+    }, selector);
+
+    // Verifica se valueProgressAfterOne é um número antes de usá-lo
+    if (valueProgressAfterOne === null) {
+      console.error("Failed to retrieve progress value.");
+      return; // Retorna se não conseguir obter o valor
+    }
+
+     maxPages = Math.round(100 / valueProgressAfterOne);
+
+    console.log("maxPages eh", maxPages);
+    
+    while (maxPages--) {
+      await applyProcess(page, model, language, res, browser, bar1);
     }
 
     const jobInfo = {
@@ -172,9 +154,7 @@ export async function applyJobs({
     };
 
     console.log("teste de apito1", jobInfo);
-
     addJobToArrayLinkedin(jobInfo);
-
     console.log("teste de apito2");
   } catch {
     console.log(`Easy apply button not found in posting: ${link}`);
@@ -183,7 +163,6 @@ export async function applyJobs({
 }
 
 async function getJobInfo(page: Page, language: string) {
-  // Espera o primeiro elemento estar visível
   const h1 = await page.waitForSelector(".t-24.t-bold.inline > a", {
     visible: true,
     timeout: 5000,
@@ -199,22 +178,47 @@ async function getJobInfo(page: Page, language: string) {
     { visible: true, timeout: 5000 }
   );
 
-  console.log("qqqqqqqqq", h1, companyNameElement, firstSpanElement);
-
   const position = await h1?.evaluate((el) => el.innerText);
-
   const company = await companyNameElement?.evaluate((el) => el.innerText);
-
-  const location = await firstSpanElement?.evaluate((el) => el.innerText); //foi
-
-  const currentDateTime = new Date();
+  const location = await firstSpanElement?.evaluate((el) => el.innerText);
 
   return {
     position,
     company,
     location,
-    currentDateTime,
+    currentDateTime: new Date(),
     platform: "Linkedin",
     language,
   };
+}
+
+async function applyProcess(page: Page, model: GenerativeModel, language: string, res: Response, browser: Browser | null, bar1: number) {
+  // Verifica se devemos parar durante o preenchimento
+  if (getStopProcessing()) {
+    res.status(200).send("Processamento interrompido.");
+    await browser?.close();
+    return;
+  }
+
+  await wait(200);
+  await fillFields(page, model, language).catch(noop);
+
+  // Verificar a barra de progresso após clicar no botão "Next"
+  const bar2 = await checkProgressBar(page);
+  await clickNextButton(page).catch(noop);
+
+  // Comparar se a barra de progresso mudou
+  if (bar1 === bar2) {
+    console.log("Progress bar did not change, breaking loop...");
+    const isSubmitButtonEn = await page.$(
+      ".jobs-easy-apply-modal button[aria-label='Submit application']"
+    );
+    const isSubmitButtonPt = await page.$(
+      ".jobs-easy-apply-modal button[aria-label='Enviar candidatura']"
+    );
+    if (!isSubmitButtonEn && !isSubmitButtonPt) {
+      console.log("No submit button found, breaking loop");
+      return; // Se o valor não mudou, sai do loop
+    }
+  }
 }

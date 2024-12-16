@@ -7,6 +7,7 @@ import { useStopLinkedin } from "./home-hooks/use-stop-linkedin";
 import { useJobContext } from "../context/job-context";
 import { userLimitOnly } from "../utils/common";
 import { useNavigate } from "react-router-dom";
+import { useStopProcessing } from "./home-hooks/use-get-stop-processing";
 
 function Home() {
   const [isRunning, setIsRunning] = useState(false);
@@ -30,6 +31,16 @@ function Home() {
     // Se pode aplicar, continua com o processo
     handlePlayLinkedin();
   };
+
+  const { isBrowserOpen } = useStopProcessing();
+
+  // Efeito para reagir a mudanças em `isBrowserOpen`
+  useEffect(() => {
+    if (!isBrowserOpen) {
+      console.log("Browser is closed:", isBrowserOpen);
+      setIsRunning(false);
+    }
+  }, [isBrowserOpen]);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:3001");
@@ -85,10 +96,12 @@ function Home() {
             <h4>Applications sent</h4>
             <p>{countAppliedJobs}</p>
           </div>
-          <div>
-            <h4>Remaining applications</h4>
-            <p>{userLimitOnly(user) - countAppliedJobs}</p> {/* erro */}
-          </div>
+          {user.usedDaysFree <= 4 && (
+            <div>
+              <h4>Remaining applications</h4>
+              <p>{userLimitOnly(user) - countAppliedJobs}</p> {/* erro */}
+            </div>
+          )}
         </div>
       </div>
 
@@ -115,10 +128,12 @@ function Home() {
               </button>
             )}
 
-            <span className={styles.remainingCount}>
-              Remaining
-              <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
-            </span>
+            {user.usedDaysFree <= 4 && (
+              <span className={styles.remainingCount}>
+                Remaining
+                <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
+              </span>
+            )}
           </div>
 
           <div className={styles.statsOverview}>
@@ -128,10 +143,12 @@ function Home() {
                   <span>Applications sent</span>
                   <strong>{countAppliedJobs}</strong>
                 </div>
-                <div>
-                  <span>Remaining applications</span>
-                  <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
-                </div>
+                {user.usedDaysFree <= 4 && (
+                  <div>
+                    <span>Remaining applications</span>
+                    <strong>{userLimitOnly(user) - countAppliedJobs}</strong>
+                  </div>
+                )}
               </div>
             </div>
           </div>
