@@ -5,6 +5,11 @@ import { useAuth } from "../../context/auth-context";
 import { toast } from "react-toastify";
 import { updateUser } from "../../services/auth-service";
 import { useJobContext } from "../../context/job-context";
+import { returnStartService } from "../../services/return-start-service";
+
+const timeout = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 export function useStopLinkedin({
   setIsRunning,
@@ -30,6 +35,10 @@ export function useStopLinkedin({
         dailyUsage: countAppliedJobs,
         lastUsage: new Date(),
       });
+
+      await timeout(2000); // 3000ms = 3s
+
+      await returnStartService()
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to stop the process. Please close the app.");

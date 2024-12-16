@@ -8,9 +8,11 @@ import { useJobContext } from "../context/job-context";
 import { userLimitOnly } from "../utils/common";
 import { useNavigate } from "react-router-dom";
 import { useStopProcessing } from "./home-hooks/use-get-stop-processing";
+import { Button } from "../components/ui/button/button";
 
 function Home() {
   const [isRunning, setIsRunning] = useState(false);
+  const [loadingStop, setLoadingStop] = useState(false);
   const navigate = useNavigate();
 
   const { handlePlayLinkedin, handleOpenBrowser } = useHome({ setIsRunning });
@@ -117,11 +119,19 @@ function Home() {
             </button>
 
             {isRunning ? (
-              <button onClick={handleStopLinkedin}>
+              <Button
+                style={{ background: "white" }}
+                loading={loadingStop}
+                onClick={async () => {
+                  setLoadingStop(true);
+                  await handleStopLinkedin();
+                  setLoadingStop(false);
+                }}
+              >
                 <span className={styles.stopIcon}>
                   <Square color="#9113CC" size={22} />
                 </span>
-              </button>
+              </Button>
             ) : (
               <button onClick={handleStartApplying}>
                 <span className={styles.playIcon}>▶</span>

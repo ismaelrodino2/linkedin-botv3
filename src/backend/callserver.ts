@@ -11,6 +11,7 @@ import {
 } from "./endpoints/linkedin-controls";
 import { handleFetchAccount } from "./endpoints/account-handler";
 import { handleStop } from "./endpoints/stop";
+import { returnStart } from "./endpoints/return-start";
 
 export function callServer() {
   const app = express();
@@ -70,6 +71,12 @@ export function callServer() {
 
   app.post("/stop", (req, res) => {
     handleStop(req, res).catch((error) => {
+      console.error("Error in handleOpen:", error);
+      res.status(500).json({ error: "Internal server error" });
+    });
+  });
+  app.post("/return-start", (req, res) => {
+    returnStart(req, res).catch((error) => {
       console.error("Error in handleOpen:", error);
       res.status(500).json({ error: "Internal server error" });
     });
