@@ -25,7 +25,10 @@ async function clickApplyButton(page: Page): Promise<void> {
     }
     await page.click(selectors.easyApplyButtonEnabled);
   } catch (error) {
-    console.log("🚀 ~ file: index.ts:18 ~ clickEasyApplyButton ~ error:", error);
+    console.log(
+      "🚀 ~ file: index.ts:18 ~ clickEasyApplyButton ~ error:",
+      error
+    );
   }
 }
 
@@ -83,9 +86,13 @@ export async function applyJobs({
   }
 
   const lngDetector = new LanguageDetect();
-  const jobDescriptionElements = await page.$$(".jobs-box__html-content .mt4 > p[dir='ltr'] span");
+  const jobDescriptionElements = await page.$$(
+    ".jobs-box__html-content .mt4 > p[dir='ltr'] span"
+  );
   const jobDescriptionText = await Promise.all(
-    jobDescriptionElements.map((element) => element.evaluate((el) => el.innerText))
+    jobDescriptionElements.map((element) =>
+      element.evaluate((el) => el.innerText)
+    )
   ).then((textArray) => textArray.join(" "));
 
   let language: string = "en"; // Default to 'en' or another default language of your choice
@@ -106,9 +113,9 @@ export async function applyJobs({
     await clickApplyButton(page);
     await clickApplyButton(page);
 
-    await applyProcess(page, model, language, res, browser, bar1);
+    await clickNextButton(page).catch(noop);
 
-    let maxPages = 7
+    let maxPages = 7;
 
     // Verificar a barra de progresso após clicar no botão "Next"
     bar2 = await checkProgressBar(page);
@@ -122,8 +129,9 @@ export async function applyJobs({
       const element = document.querySelector(selector);
       if (element) {
         const text = element.textContent?.trim(); // Exemplo: "50%"
-        if (text) { // Verifica se text não é undefined
-          const numberOnly = text.replace('%', ''); // Remove o símbolo "%"
+        if (text) {
+          // Verifica se text não é undefined
+          const numberOnly = text.replace("%", ""); // Remove o símbolo "%"
           return parseFloat(numberOnly); // Converte para número
         }
       }
@@ -136,10 +144,15 @@ export async function applyJobs({
       return; // Retorna se não conseguir obter o valor
     }
 
-     maxPages = Math.round(100 / valueProgressAfterOne);
+    maxPages = Math.round(100 / valueProgressAfterOne);
 
-    console.log("maxPages eh", maxPages);
-    
+    // Verifica se devemos parar após navegar para a página
+    if (getStopProcessing()) {
+      res.status(200).send("Processamento interrompido.");
+      await browser?.close();
+      return;
+    }
+
     while (maxPages--) {
       await applyProcess(page, model, language, res, browser, bar1);
     }
@@ -192,7 +205,14 @@ async function getJobInfo(page: Page, language: string) {
   };
 }
 
-async function applyProcess(page: Page, model: GenerativeModel, language: string, res: Response, browser: Browser | null, bar1: number) {
+async function applyProcess(
+  page: Page,
+  model: GenerativeModel,
+  language: string,
+  res: Response,
+  browser: Browser | null,
+  bar1: number
+) {
   // Verifica se devemos parar durante o preenchimento
   if (getStopProcessing()) {
     res.status(200).send("Processamento interrompido.");
@@ -220,5 +240,12 @@ async function applyProcess(page: Page, model: GenerativeModel, language: string
       console.log("No submit button found, breaking loop");
       return; // Se o valor não mudou, sai do loop
     }
+  }
+
+  // Verifica se devemos parar após navegar para a página
+  if (getStopProcessing()) {
+    res.status(200).send("Processamento interrompido.");
+    await browser?.close();
+    return;
   }
 }
