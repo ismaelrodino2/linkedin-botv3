@@ -67,6 +67,7 @@ export async function applyJobs({
   remainingApplications,
 }: Params) {
   let bar1 = 0;
+  /* @ts-ignore */
   let bar2 = 0;
 
   if (appliedJobsLinkedin >= remainingApplications) {
