@@ -28,6 +28,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             className={`${styles.Input} ${className}`}
             {...props}
+            
+            
           />
           {type === 'password' ? (
             <Button type="button" variant="ghost" onClick={handlePasswordEye} className={styles.passwordButton}>

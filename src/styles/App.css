@@ -3,6 +3,8 @@
 
 :root {
   --font-family-lora: 'Lora', serif;
+  --font-family-inter: 'Inter', sans-serif;
+
   --background-gray-dark: #f0f0f0; /* Substitua pelos valores HSL desejados */
   --background-gray-light: #f5f5f5; /* Substitua pelos valores HSL desejados */
   --border-dark: #d9d9d9;
@@ -13,6 +15,11 @@
 :root {
   --navbar-height: 84px; /* Altura da NavBar */
 }
+
+* {
+  font-family: var(--font-family-inter);
+}
+
 
 #root {
   height: 100vh; /* Altura total para páginas sem NavBar */

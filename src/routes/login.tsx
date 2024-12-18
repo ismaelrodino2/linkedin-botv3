@@ -12,7 +12,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -57,17 +56,10 @@ export default function Login() {
   };
 
   return (
-    <div style={{ height: "100%", minHeight: "100vh", display: "flex" }}>
-      <Card style={{ width: "50%", border: "none" }}>
-        <div
-          style={{
-            paddingLeft: 113,
-            paddingRight: 113,
-          }}
-        >
-          <CardHeader
-            style={{ paddingTop: 70, paddingBottom: 90, alignItems: "center" }}
-          >
+    <div className="main-container">
+      <Card className="first-section-card">
+        <div className="first-section">
+          <CardHeader className="header">
             <CardTitle
               style={{
                 color: "#9113CC",
@@ -81,11 +73,11 @@ export default function Login() {
               Wish Apply
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="content-first-section">
             <FormProvider {...methods}>
               <Form
                 onSubmit={methods.handleSubmit(onSubmit)}
-                className="space-y-4"
+                style={{width: '100%'}}
               >
                 {/* Campo de E-mail */}
                 <FormField
@@ -139,16 +131,7 @@ export default function Login() {
           </CardContent>
         </div>
       </Card>
-      <Card
-        style={{
-          width: "50%",
-          border: "none",
-          backgroundImage: "url(/bg.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      ></Card>
+      <Card className="second-section"></Card>
     </div>
   );
 }

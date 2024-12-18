@@ -17,7 +17,16 @@ export const NavBar = () => {
       }}
     >
       <nav className="navbar">
-        <Link to="/" className="logo">
+        <Link
+          to="/"
+          className="logo"
+          style={{
+            fontFamily: "var(--font-family-lora)",
+            fontWeight: 400,
+            fontSize: "24px",
+            lineHeight: "24px",
+          }}
+        >
           Wish Apply
         </Link>
 

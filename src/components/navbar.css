@@ -37,9 +37,22 @@
   color: #FFFFFF;
 }
 
-.nav-links a.active {
+
+
+a.active{
   color: #FFFFFF;
-  text-decoration: underline;
+  position: relative;
+  text-decoration: none; /* Remove o sublinhado padrão */
+}
+
+ a.active::after{
+  content: '';
+  position: absolute;
+  bottom: -1.5px; /* Distância da linha para o texto */
+  left: 0;
+  width: 100%;
+  height: 1px; /* Altura da linha */
+  background-color: currentColor; /* Cor da linha, que será a mesma cor do texto */
 }
 
 .profile-image {
