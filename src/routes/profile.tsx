@@ -255,6 +255,7 @@ export default function ProfileForm() {
                         height: "100%",
                         boxSizing: "border-box",
                       }}
+                      rows={10}
                     />
                   </FormControl>
                   <FormMessage />
@@ -305,9 +306,9 @@ export default function ProfileForm() {
                         methods.setValue("desiredSalaries", newSalaries);
                       }
                     }}
-                    style={{ marginLeft: "8px", marginBottom: 8 }}
+                    style={{ marginLeft: "8px", marginBottom: 8, padding: 4 }}
                   >
-                    <TrashIcon />
+                    <TrashIcon color="black" />
                   </Button>
                 </div>
               ))}
@@ -536,10 +537,10 @@ export default function ProfileForm() {
                           methods.setValue("languages", newLanguages);
                         }
                       }}
-                      style={{ marginLeft: "8px", marginBottom: 8 }}
-                    >
-                      <TrashIcon />
-                    </Button>
+                      style={{ marginLeft: "8px", marginBottom: 8, padding: 4 }}
+                      >
+                        <TrashIcon color="black" />
+                      </Button>
                   </div>
                 </div>
               ))}
@@ -605,10 +606,10 @@ export default function ProfileForm() {
                           methods.setValue("technologies", newTechnologies);
                         }
                       }}
-                      style={{ marginLeft: "8px", marginBottom: 8 }}
-                    >
-                      <TrashIcon />
-                    </Button>
+                      style={{ marginLeft: "8px", marginBottom: 8, padding: 4 }}
+                      >
+                        <TrashIcon color="black" />
+                      </Button>
                   </div>
                 </div>
               ))}
@@ -651,7 +652,7 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>Hard Skills</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea {...field} rows={7} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -666,7 +667,7 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>Proficiency</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea {...field}  rows={7} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

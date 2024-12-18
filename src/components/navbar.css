@@ -45,7 +45,7 @@ a.active{
   text-decoration: none; /* Remove o sublinhado padrão */
 }
 
- a.active::after{
+a.active:not(.user)::after {
   content: '';
   position: absolute;
   bottom: -1.5px; /* Distância da linha para o texto */

@@ -4,6 +4,8 @@
   padding: 37px 0;
 }
 
+
+
  
 
 .section {
@@ -101,6 +103,17 @@
   gap: 8px;
   flex: 1;
   justify-content: space-between;
+  width: 100% !important;
+}
+
+.fieldWithButton > div{
+  width: 100% !important;
+
+}
+
+.fieldWithButton button[role="combobox"]{
+  width: 100% !important;
+
 }
 
 @media (max-width: 640px) {

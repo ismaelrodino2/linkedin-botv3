@@ -40,6 +40,7 @@ export const NavBar = () => {
         </ul>
 
         <NavLink
+        className={'user'}
           to="/profile"
           style={{ width: 128, display: "flex", flexDirection: "row-reverse" }}
         >

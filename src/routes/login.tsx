@@ -21,6 +21,7 @@ import {
 import { Input } from "../components/ui/input/input";
 import { Button } from "../components/ui/button/button";
 import { useAuth } from "../context/auth-context";
+import { Navigate } from "react-router-dom";
 
 // Definição do schema usando Zod
 const signInSchema = z.object({
@@ -54,6 +55,14 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const {user} = useAuth()
+
+  if (user) {
+    return(
+      <Navigate to="/" />
+    )
+  }
 
   return (
     <div className="main-container">
