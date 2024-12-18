@@ -16,6 +16,10 @@
   text-decoration: none;
 }
 
+.logo:hover{
+  color: white;
+}
+
 .nav-links {
   display: flex;
   gap: 2rem;

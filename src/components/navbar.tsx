@@ -1,11 +1,21 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import "./navbar.css";
-import ModeToggle from "./ui/theme-toggle/theme-toggle";
+import { CircleUser } from "lucide-react";
 
 export const NavBar = () => {
+  const location = useLocation();
+
+  if (location.pathname === "/login") return;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", width: '100%',
-      top: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        top: 0,
+      }}
+    >
       <nav className="navbar">
         <Link to="/" className="logo">
           Wish Apply
@@ -20,7 +30,12 @@ export const NavBar = () => {
           </li>
         </ul>
 
-        <ModeToggle />
+        <NavLink
+          to="/profile"
+          style={{ width: 128, display: "flex", flexDirection: "row-reverse" }}
+        >
+          <CircleUser size={38} strokeWidth={1} color="white" />
+        </NavLink>
       </nav>
     </div>
   );

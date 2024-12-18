@@ -8,7 +8,6 @@ import "./styles/theme.css";
 import "./styles/globals.css";
 import "./styles/animations.css";
 import { NavBar } from "./components/navbar.tsx";
-import { ThemeProvider } from "./providers/theme-provider.tsx";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { JobProvider } from "./context/job-context.tsx";
@@ -16,7 +15,6 @@ import { JobProvider } from "./context/job-context.tsx";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <HashRouter>
-      <ThemeProvider>
         <AuthProvider>
           <JobProvider>
             <NavBar />
@@ -30,7 +28,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <ToastContainer />
           </JobProvider>
         </AuthProvider>
-      </ThemeProvider>
     </HashRouter>
   </React.StrictMode>
 );

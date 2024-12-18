@@ -1,3 +1,4 @@
+import "./login.css";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -56,75 +57,98 @@ export default function Login() {
   };
 
   return (
-      <Card style={{height: '100%',  minHeight: 'calc(100vh - 70px)'}}>
-        <CardHeader>
-          <CardTitle className="text-xl text-center">Login</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FormProvider {...methods}>
-            <Form
-              onSubmit={methods.handleSubmit(onSubmit)}
-              className="space-y-4"
+    <div style={{ height: "100%", minHeight: "100vh", display: "flex" }}>
+      <Card style={{ width: "50%", border: "none" }}>
+        <div
+          style={{
+            paddingLeft: 113,
+            paddingRight: 113,
+          }}
+        >
+          <CardHeader
+            style={{ paddingTop: 70, paddingBottom: 90, alignItems: "center" }}
+          >
+            <CardTitle
+              style={{
+                color: "#9113CC",
+                font: "var(--font-family-lora)",
+                fontWeight: 400,
+                fontSize: 32,
+                lineHeight: "39.24px",
+                letterSpacing: "11px",
+              }}
             >
-              {/* Campo de E-mail */}
-              <FormField
-                name="email"
-                control={methods.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Digite seu e-mail"
-                        className="input-class" // Adicione suas classes de estilo
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Digite seu endereço de e-mail registrado.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              Wish Apply
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormProvider {...methods}>
+              <Form
+                onSubmit={methods.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                {/* Campo de E-mail */}
+                <FormField
+                  name="email"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Digite seu e-mail"
+                          {...field}
+                        />
+                      </FormControl>
 
-              {/* Campo de Senha */}
-              <FormField
-                name="password"
-                control={methods.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Digite sua senha"
-                        className="input-class" // Adicione suas classes de estilo
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Sua senha deve ter pelo menos 6 caracteres.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Botão de Enviar */}
-              <div>
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="button-class" // Adicione suas classes de estilo
-                >
-                  Entrar
-                </Button>
-              </div>
-            </Form>
-          </FormProvider>
-        </CardContent>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Campo de Senha */}
+                <FormField
+                  name="password"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <FormItem id="pass-item">
+                      <FormLabel>Senha</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Digite sua senha"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Botão de Enviar */}
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <Button
+                    type="submit"
+                    loading={loading}
+                    style={{ marginTop: 29 }}
+                  >
+                    Entrar
+                  </Button>
+                </div>
+              </Form>
+            </FormProvider>
+          </CardContent>
+        </div>
       </Card>
+      <Card
+        style={{
+          width: "50%",
+          border: "none",
+          backgroundImage: "url(/bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      ></Card>
+    </div>
   );
 }

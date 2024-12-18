@@ -5,6 +5,10 @@
     height: 100%;
     flex: 1;
   }
+
+  #pass-item > div {
+    width: 100% !important;
+  }
   
   /* Lado esquerdo do formulário de login */
   .login-left {
